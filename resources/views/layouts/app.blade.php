@@ -23,9 +23,10 @@
             <livewire:layout.navigation />
 
             <!-- Main Content Area -->
-            <div class="flex-1 sm:pl-64 flex flex-col transition-all duration-300">
-                <main class="flex-1 py-6 sm:py-8 px-3 sm:px-4 lg:px-6 xl:px-8">
-                    @if (isset($header))
+            <div class="flex-1 sm:pl-64 pt-16 flex flex-col transition-all duration-300">
+                <!-- POS पेज हो भने py-0 px-0 बनाउने, नत्र साविककै प्याडिङ राख्ने -->
+                <main class="flex-1 {{ request()->is('pos*') ? 'p-0' : 'py-6 sm:py-8 px-3 sm:px-4 lg:px-6 xl:px-8' }}">
+                    @if (isset($header) && !request()->is('pos*'))
                         <header class="mb-6 sm:mb-8">
                             <div class="max-w-7xl mx-auto">
                                 {{ $header }}
@@ -33,7 +34,7 @@
                         </header>
                     @endif
 
-                    <div class="max-w-7xl mx-auto">
+                    <div class="{{ request()->is('pos*') ? 'max-w-full' : 'max-w-7xl mx-auto' }}">
                         @if(session('success'))
                             <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" class="mb-4 sm:mb-6 p-3 sm:p-4 bg-emerald-50 border-l-4 border-emerald-500 text-emerald-700 rounded-r-lg shadow-sm flex justify-between items-center">
                                 <div class="flex items-center">
@@ -62,7 +63,8 @@
                     </div>
                 </main>
 
-                <!-- Footer -->
+                <!-- Footer - POS पेज बाहेक अरुमा मात्र देखाउने -->
+                @if(!request()->is('pos*'))
                 <footer class="bg-white border-t border-gray-100 py-4 sm:py-6 px-3 sm:px-4 lg:px-6 xl:px-8 mt-auto">
                     <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-3 sm:gap-4">
                         <div class="text-xs sm:text-sm text-gray-500 font-medium text-center md:text-left">
@@ -76,6 +78,7 @@
                         </div>
                     </div>
                 </footer>
+                @endif
             </div>
         </div>
         
