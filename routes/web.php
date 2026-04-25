@@ -19,7 +19,7 @@ use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\StockAdjustmentController;
 
-Route::view('/', 'welcome');
+Route::redirect('/', 'login');
 
 Route::get('dashboard', DashboardController::class)
     ->middleware(['auth', 'verified'])
