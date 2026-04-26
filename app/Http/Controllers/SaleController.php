@@ -41,7 +41,7 @@ class SaleController extends Controller
     {
         $customers = Customer::where('active', true)->get();
         $stores = Store::where('active', true)->get();
-        $products = Product::where('active', true)->get();
+        $products = Product::with('taxRate')->where('active', true)->get();
 
         return view('sales.create', compact('customers', 'stores', 'products'));
     }

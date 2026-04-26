@@ -56,18 +56,18 @@
                                                     <select :name="'items['+index+'][product_id]'" x-model="item.product_id" @change="updatePrice(index)" class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm" required>
                                                         <option value="">Select Product</option>
                                                         @foreach($products as $product)
-                                                            <option value="{{ $product->id }}" data-price="{{ $product->price }}">{{ $product->name }} ({{ $product->sku }})</option>
+                                                            <option value="{{ $product->id }}" data-price="{{ $product->price }}" data-tax-rate="{{ $product->taxRate->rate ?? 0 }}">{{ $product->name }} ({{ $product->sku }})</option>
                                                         @endforeach
                                                     </select>
                                                 </td>
                                                 <td class="px-4 py-2">
-                                                    <input type="number" :name="'items['+index+'][unit_price]'" x-model.number="item.unit_price" step="0.01" class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm" required>
+                                                    <input type="number" :name="'items['+index+'][unit_price]'" x-model.number="item.unit_price" @input="updateTaxFromItems" step="0.01" class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm" required>
                                                 </td>
                                                 <td class="px-4 py-2">
-                                                    <input type="number" :name="'items['+index+'][quantity]'" x-model.number="item.quantity" class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm" required>
+                                                    <input type="number" :name="'items['+index+'][quantity]'" x-model.number="item.quantity" @input="updateTaxFromItems" class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm" required>
                                                 </td>
                                                 <td class="px-4 py-2">
-                                                    <input type="number" :name="'items['+index+'][discount]'" x-model.number="item.discount" step="0.01" class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm">
+                                                    <input type="number" :name="'items['+index+'][discount]'" x-model.number="item.discount" @input="updateTaxFromItems" step="0.01" class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm">
                                                 </td>
                                                 <td class="px-4 py-2 text-sm font-bold" x-text="formatCurrency((item.unit_price * item.quantity) - item.discount)"></td>
                                                 <td class="px-4 py-2 text-right">
@@ -96,7 +96,7 @@
                                     </div>
                                     <div class="flex justify-between items-center">
                                         <span>Order Discount:</span>
-                                        <input type="number" name="discount" x-model.number="orderDiscount" step="0.01" class="w-32 text-right border-gray-300 rounded-md shadow-sm text-sm">
+                                        <input type="number" name="discount" x-model.number="orderDiscount" @input="updateTaxAmountFromRate" step="0.01" class="w-32 text-right border-gray-300 rounded-md shadow-sm text-sm">
                                     </div>
                                     <div class="flex justify-between items-center">
                                         <span>Tax Rate (%):</span>
@@ -141,14 +141,14 @@
     <script>
         function saleItems() {
             return {
-                items: [{ product_id: '', unit_price: 0, quantity: 1, discount: 0 }],
+                items: [{ product_id: '', unit_price: 0, quantity: 1, discount: 0, tax_rate: 0 }],
                 orderDiscount: 0,
                 taxRate: 0,
                 taxAmount: 0,
                 paidAmount: 0,
 
                 addItem() {
-                    this.items.push({ product_id: '', unit_price: 0, quantity: 1, discount: 0 });
+                    this.items.push({ product_id: '', unit_price: 0, quantity: 1, discount: 0, tax_rate: 0 });
                 },
 
                 removeItem(index) {
@@ -159,13 +159,41 @@
                     const select = event.target;
                     const option = select.options[select.selectedIndex];
                     const price = option.dataset.price;
+                    const taxRate = option.dataset.taxRate;
                     if (price) {
                         this.items[index].unit_price = parseFloat(price);
                     }
+                    if (taxRate) {
+                        this.items[index].tax_rate = parseFloat(taxRate);
+                    } else {
+                        this.items[index].tax_rate = 0;
+                    }
+                    this.updateTaxFromItems();
                 },
 
                 subtotal() {
                     return this.items.reduce((sum, item) => sum + (item.unit_price * item.quantity - (item.discount || 0)), 0);
+                },
+
+                totalTaxAmountFromItems() {
+                    return this.items.reduce((total, item) => {
+                        const subtotal = item.unit_price * item.quantity - (item.discount || 0);
+                        return total + (subtotal * (item.tax_rate / 100));
+                    }, 0);
+                },
+
+                effectiveTaxRate() {
+                    const subtotal = this.subtotal();
+                    if (subtotal === 0) return 0;
+                    const totalTax = this.totalTaxAmountFromItems();
+                    return (totalTax / subtotal) * 100;
+                },
+
+                updateTaxFromItems() {
+                    const totalTax = this.totalTaxAmountFromItems();
+                    const effectiveRate = this.effectiveTaxRate();
+                    this.taxAmount = totalTax;
+                    this.taxRate = effectiveRate;
                 },
 
                 taxableAmount() {

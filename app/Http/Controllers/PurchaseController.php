@@ -32,7 +32,7 @@ class PurchaseController extends Controller
                 ->with('error', 'You must create at least one active store before recording a purchase.');
         }
 
-        $products = Product::where('active', true)->get();
+        $products = Product::with('taxRate')->where('active', true)->get();
         
         return view('purchases.create', compact('suppliers', 'stores', 'products'));
     }
