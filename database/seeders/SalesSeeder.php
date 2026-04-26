@@ -116,7 +116,7 @@ class SalesSeeder extends Seeder
                 'net_amount' => 81360.00,
                 'paid_amount' => 0.00,
                 'status' => 'completed',
-                'payment_status' => 'not_paid',
+                'payment_status' => 'unpaid',
                 'notes' => 'Credit sale',
                 'user_id' => $userIds[0] ?? 1,
             ],
@@ -187,7 +187,7 @@ class SalesSeeder extends Seeder
                     'product_id' => $productId,
                     'quantity' => $quantity,
                     'unit_price' => $unitPrice,
-                    'total' => $total,
+                    'subtotal' => $total,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
@@ -199,7 +199,7 @@ class SalesSeeder extends Seeder
             if ($sale->paid_amount > 0) {
                 SalePayment::create([
                     'sale_id' => $sale->id,
-                    'payment_method_id' => 1, // Cash
+                    'payment_method' => 'cash',
                     'amount' => $sale->paid_amount,
                     'notes' => 'Payment for invoice ' . $sale->invoice_no,
                     'date' => $sale->date,

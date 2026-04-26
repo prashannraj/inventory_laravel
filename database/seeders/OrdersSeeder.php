@@ -110,7 +110,7 @@ class OrdersSeeder extends Seeder
                 'vat_charge' => 11050.00,
                 'net_amount' => 104550.00,
                 'discount' => 3000.00,
-                'paid_status' => 'not_paid',
+                'paid_status' => 'unpaid',
                 'user_id' => $userIds[0] ?? 1,
             ],
             [
@@ -179,9 +179,9 @@ class OrdersSeeder extends Seeder
                 $items[] = [
                     'order_id' => $order->id,
                     'product_id' => $productId,
-                    'quantity' => $quantity,
+                    'qty' => $quantity,
                     'rate' => $rate,
-                    'total' => $total,
+                    'amount' => $total,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];

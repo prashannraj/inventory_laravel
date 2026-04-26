@@ -92,10 +92,7 @@ class AdjustmentsSeeder extends Seeder
                 $items[] = [
                     'stock_adjustment_id' => $adjustment->id,
                     'product_id' => $productId,
-                    'quantity' => abs($quantity),
-                    'type' => $type,
-                    'current_qty' => $currentQty,
-                    'new_qty' => $newQty,
+                    'quantity' => $quantity, // Keep signed value (positive for addition, negative for deduction)
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
