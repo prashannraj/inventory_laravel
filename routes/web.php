@@ -91,6 +91,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/', [CompanyController::class, 'edit'])->name('edit')->middleware('permission:updateCompany');
         Route::put('/', [CompanyController::class, 'update'])->name('update')->middleware('permission:updateCompany');
     });
+
+    // Documentation
+    Route::get('documentation', function () {
+        return view('documentation');
+    })->name('documentation')->middleware('auth');
 });
 
 require __DIR__.'/auth.php';

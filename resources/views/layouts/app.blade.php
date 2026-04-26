@@ -71,8 +71,8 @@
                             &copy; {{ date('Y') }} {{ $siteSettings['company_name'] ?? 'Inventory Management System' }}. All rights reserved.
                         </div>
                         <div class="flex items-center gap-3 sm:gap-6 flex-wrap justify-center">
-                            <a href="#" class="text-xs font-bold text-gray-400 hover:text-indigo-600 transition-colors uppercase tracking-widest">Documentation</a>
-                            <a href="#" class="text-xs font-bold text-gray-400 hover:text-indigo-600 transition-colors uppercase tracking-widest">Support</a>
+                            <a href="{{ route('documentation') }}" class="text-xs font-bold text-gray-400 hover:text-indigo-600 transition-colors uppercase tracking-widest">Documentation</a>
+                            <a href="https://appantech.com.np" target="_blank" class="text-xs font-bold text-gray-400 hover:text-indigo-600 transition-colors uppercase tracking-widest">Support</a>
                             <div class="h-4 w-px bg-gray-200 hidden sm:block"></div>
                             <div class="text-xs font-black text-indigo-500 bg-indigo-50 px-2 py-1 rounded">v2.1.0</div>
                         </div>

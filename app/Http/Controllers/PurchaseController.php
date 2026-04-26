@@ -6,6 +6,7 @@ use App\Models\Purchase;
 use App\Models\Product;
 use App\Models\Supplier;
 use App\Models\Store;
+use App\Models\TaxRate;
 use App\Http\Requests\StorePurchaseRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -45,14 +46,43 @@ class PurchaseController extends Controller
             $data['purchase_no'] = 'PUR-' . date('Ymd') . '-' . strtoupper(Str::random(4));
             $data['user_id'] = Auth::id();
             
-            // Calculate totals
+            // Calculate totals and tax
             $total_amount = 0;
+            $total_tax_amount = 0;
+            $items_with_tax = [];
+            
+            // Preload products with tax rates for efficiency
+            $product_ids = array_column($data['items'], 'product_id');
+            $products = Product::with('taxRate')->whereIn('id', $product_ids)->get()->keyBy('id');
+            
             foreach ($data['items'] as $item) {
-                $total_amount += $item['quantity'] * $item['cost_price'];
+                $item_total = $item['quantity'] * $item['cost_price'];
+                $total_amount += $item_total;
+                
+                // Calculate tax for this item
+                $product = $products[$item['product_id']] ?? null;
+                $tax_rate = $product->taxRate ?? null;
+                $item_tax_amount = 0;
+                
+                if ($tax_rate && $tax_rate->rate > 0) {
+                    $item_tax_amount = $item_total * ($tax_rate->rate / 100);
+                }
+                
+                $total_tax_amount += $item_tax_amount;
+                
+                // Store item with tax info for later creation
+                $items_with_tax[] = [
+                    'product_id' => $item['product_id'],
+                    'quantity' => $item['quantity'],
+                    'cost_price' => $item['cost_price'],
+                    'tax_amount' => $item_tax_amount,
+                    'subtotal' => $item_total,
+                ];
             }
             
             $data['total_amount'] = $total_amount;
-            $data['net_amount'] = $total_amount - ($data['discount'] ?? 0) + ($data['tax_amount'] ?? 0);
+            $data['tax_amount'] = $total_tax_amount; // Auto-calculated tax
+            $data['net_amount'] = $total_amount - ($data['discount'] ?? 0) + $total_tax_amount;
 
             // Handle document upload
             if ($request->hasFile('document')) {
@@ -62,14 +92,8 @@ class PurchaseController extends Controller
             $purchase = Purchase::create($data);
 
             // Save items and update stock if received
-            foreach ($data['items'] as $item) {
-                $purchase->items()->create([
-                    'product_id' => $item['product_id'],
-                    'quantity' => $item['quantity'],
-                    'cost_price' => $item['cost_price'],
-                    'tax_amount' => 0, // Simplified for now
-                    'subtotal' => $item['quantity'] * $item['cost_price'],
-                ]);
+            foreach ($items_with_tax as $item) {
+                $purchase->items()->create($item);
 
                 if ($purchase->status === 'received') {
                     $product = Product::find($item['product_id']);
@@ -100,7 +124,7 @@ class PurchaseController extends Controller
 
     public function show(Purchase $purchase)
     {
-        $purchase->load(['supplier', 'store', 'user', 'items.product']);
+        $purchase->load(['supplier', 'store', 'user', 'items.product.taxRate']);
         return view('purchases.show', compact('purchase'));
     }
 

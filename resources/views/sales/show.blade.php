@@ -63,6 +63,8 @@
                                     <th class="px-6 py-4 text-center">Qty</th>
                                     <th class="px-6 py-4 text-right">Unit Price</th>
                                     <th class="px-6 py-4 text-right">Discount</th>
+                                    <th class="px-6 py-4 text-right">Tax Rate</th>
+                                    <th class="px-6 py-4 text-right">Tax Amount</th>
                                     <th class="px-6 py-4 text-right">Extended Price</th>
                                 </tr>
                             </thead>
@@ -76,6 +78,14 @@
                                     <td class="px-6 py-5 text-center font-bold text-gray-700">{{ $item->quantity }}</td>
                                     <td class="px-6 py-5 text-right font-bold text-gray-900">Rs. {{ number_format($item->unit_price, 2) }}</td>
                                     <td class="px-6 py-5 text-right font-bold text-rose-500">- Rs. {{ number_format($item->discount, 2) }}</td>
+                                    <td class="px-6 py-5 text-right font-bold text-gray-700">
+                                        @if($item->product->taxRate)
+                                            {{ $item->product->taxRate->name }} ({{ number_format($item->product->taxRate->rate, 2) }}%)
+                                        @else
+                                            <span class="text-gray-400">No Tax</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-5 text-right font-bold text-emerald-500">+ Rs. {{ number_format($item->tax_amount, 2) }}</td>
                                     <td class="px-6 py-5 text-right font-black text-indigo-600">Rs. {{ number_format($item->subtotal, 2) }}</td>
                                 </tr>
                                 @endforeach

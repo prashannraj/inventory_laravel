@@ -114,7 +114,10 @@
                                 </div>
                                 <div class="flex justify-between mb-2 items-center">
                                     <span class="text-gray-600">Tax Amount:</span>
-                                    <x-text-input type="number" step="0.01" name="tax_amount" x-model.number="tax_amount" class="w-32 text-right" />
+                                    <div class="w-32 text-right">
+                                        <span class="text-sm text-gray-500 italic">Auto-calculated</span>
+                                        <input type="hidden" name="tax_amount" x-model.number="tax_amount" value="0">
+                                    </div>
                                 </div>
                                 <div class="border-t pt-2 mt-2 flex justify-between">
                                     <span class="text-lg font-bold">Grand Total:</span>

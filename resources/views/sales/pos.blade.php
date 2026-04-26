@@ -19,6 +19,8 @@
                     'price' => (float)$p->price,
                     'qty' => $p->qty,
                     'category_id' => $p->category_id,
+                    'tax_rate' => $p->taxRate ? (float)$p->taxRate->rate : 0,
+                    'tax_name' => $p->taxRate ? $p->taxRate->name : null,
                     'primary_image' => $p->images->where('is_primary', true)->first()?->image_path
                  ])) }}"
                  class="flex flex-col lg:flex-row gap-8 h-[calc(100vh-12rem)]">
@@ -121,6 +123,10 @@
                                     <span class="text-gray-600">Discount:</span>
                                     <input type="number" name="discount" x-model.number="discount" class="w-24 text-right border-gray-300 rounded text-sm p-1">
                                 </div>
+                                <div class="flex justify-between text-gray-600">
+                                    <span>Tax:</span>
+                                    <span x-text="formatCurrency(taxTotal())"></span>
+                                </div>
                                 <div class="flex justify-between text-xl font-bold border-t pt-2">
                                     <span>Total Payable:</span>
                                     <span class="text-indigo-600" x-text="formatCurrency(grandTotal())"></span>
@@ -204,7 +210,9 @@
                             name: product.name,
                             unit_price: product.price,
                             quantity: 1,
-                            max_qty: product.qty
+                            max_qty: product.qty,
+                            tax_rate: product.tax_rate || 0,
+                            tax_name: product.tax_name || null
                         });
                     }
                     this.updatePaidAmount();
@@ -230,8 +238,16 @@
                     return this.cart.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0);
                 },
 
+                taxTotal() {
+                    return this.cart.reduce((sum, item) => {
+                        const itemTotal = item.quantity * item.unit_price;
+                        const taxAmount = itemTotal * (item.tax_rate / 100);
+                        return sum + taxAmount;
+                    }, 0);
+                },
+
                 grandTotal() {
-                    return Math.max(0, this.subtotal() - this.discount);
+                    return Math.max(0, this.subtotal() - this.discount + this.taxTotal());
                 },
 
                 updatePaidAmount() {

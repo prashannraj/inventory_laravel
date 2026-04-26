@@ -6,6 +6,7 @@ use App\Models\Sale;
 use App\Models\Product;
 use App\Models\Customer;
 use App\Models\Store;
+use App\Models\TaxRate;
 use App\Http\Requests\StoreSaleRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -46,16 +47,49 @@ class SaleController extends Controller
             $data['invoice_no'] = 'INV-' . date('Ymd') . '-' . strtoupper(Str::random(4));
             $data['user_id'] = Auth::id();
             
-            // Calculate totals
+            // Calculate totals and tax
             $total_amount = 0;
+            $total_tax_amount = 0;
+            $items_with_tax = [];
+            
+            // Preload products with tax rates for efficiency
+            $product_ids = array_column($data['items'], 'product_id');
+            $products = Product::with('taxRate')->whereIn('id', $product_ids)->get()->keyBy('id');
+            
             foreach ($data['items'] as $item) {
-                $total_amount += $item['quantity'] * $item['unit_price'];
+                $item_subtotal = $item['quantity'] * $item['unit_price'];
+                $item_discount = $item['discount'] ?? 0;
+                $item_net = $item_subtotal - $item_discount;
+                $total_amount += $item_subtotal;
+                
+                // Calculate tax for this item
+                $product = $products[$item['product_id']] ?? null;
+                $tax_rate = $product->taxRate ?? null;
+                $item_tax_amount = 0;
+                
+                if ($tax_rate && $tax_rate->rate > 0) {
+                    // Calculate tax on net amount (after discount)
+                    $item_tax_amount = $item_net * ($tax_rate->rate / 100);
+                }
+                
+                $total_tax_amount += $item_tax_amount;
+                
+                // Store item with tax info for later creation
+                $items_with_tax[] = [
+                    'product_id' => $item['product_id'],
+                    'quantity' => $item['quantity'],
+                    'unit_price' => $item['unit_price'],
+                    'discount' => $item_discount,
+                    'tax_amount' => $item_tax_amount,
+                    'subtotal' => $item_net,
+                ];
             }
             
             $data['total_amount'] = $total_amount;
-            $data['net_amount'] = $total_amount - ($data['discount'] ?? 0) + ($data['tax_amount'] ?? 0);
+            $data['tax_amount'] = $total_tax_amount; // Auto-calculated tax
+            $data['net_amount'] = $total_amount - ($data['discount'] ?? 0) + $total_tax_amount;
             
-            // Determine payment status
+            // Determine payment status (based on net amount with auto-calculated tax)
             if ($data['paid_amount'] >= $data['net_amount']) {
                 $data['payment_status'] = 'paid';
             } elseif ($data['paid_amount'] > 0) {
@@ -67,15 +101,8 @@ class SaleController extends Controller
             $sale = Sale::create($data);
 
             // Save items and update stock
-            foreach ($data['items'] as $item) {
-                $sale->items()->create([
-                    'product_id' => $item['product_id'],
-                    'quantity' => $item['quantity'],
-                    'unit_price' => $item['unit_price'],
-                    'discount' => $item['discount'] ?? 0,
-                    'tax_amount' => 0, // Simplified
-                    'subtotal' => ($item['quantity'] * $item['unit_price']) - ($item['discount'] ?? 0),
-                ]);
+            foreach ($items_with_tax as $item) {
+                $sale->items()->create($item);
 
                 $product = Product::find($item['product_id']);
                 
@@ -119,7 +146,7 @@ class SaleController extends Controller
 
     public function show(Sale $sale)
     {
-        $sale->load(['customer', 'store', 'user', 'items.product', 'payments']);
+        $sale->load(['customer', 'store', 'user', 'items.product.taxRate', 'payments']);
         return view('sales.show', compact('sale'));
     }
 

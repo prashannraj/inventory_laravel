@@ -58,6 +58,8 @@
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
                                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
                                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Cost Price</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Tax Rate</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Tax Amount</th>
                                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Subtotal</th>
                                 </tr>
                             </thead>
@@ -70,13 +72,22 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right">{{ $item->quantity }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right">Rs. {{ number_format($item->cost_price, 2) }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right">
+                                        @if($item->product->taxRate)
+                                            {{ $item->product->taxRate->name }} ({{ number_format($item->product->taxRate->rate, 2) }}%)
+                                        @else
+                                            <span class="text-gray-400">No Tax</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-emerald-600 font-medium">Rs. {{ number_format($item->tax_amount, 2) }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right font-medium">Rs. {{ number_format($item->subtotal, 2) }}</td>
                                 </tr>
                                 @endforeach
                             </tbody>
                             <tfoot class="bg-gray-50 font-bold">
                                 <tr>
-                                    <td colspan="3" class="px-6 py-4 text-right uppercase tracking-wider">Items Total</td>
+                                    <td colspan="4" class="px-6 py-4 text-right uppercase tracking-wider">Items Total</td>
+                                    <td class="px-6 py-4 text-right">Rs. {{ number_format($purchase->items->sum('tax_amount'), 2) }}</td>
                                     <td class="px-6 py-4 text-right text-lg">Rs. {{ number_format($purchase->total_amount, 2) }}</td>
                                 </tr>
                             </tfoot>
