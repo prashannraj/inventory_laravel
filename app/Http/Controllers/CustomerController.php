@@ -28,8 +28,8 @@ class CustomerController extends Controller
 
     public function show(Customer $customer)
     {
-        $customer->load('sales');
-        return view('customers.show', compact('customer'));
+        $sales = $customer->sales()->latest()->paginate(10);
+        return view('customers.show', compact('customer', 'sales'));
     }
 
     public function edit(Customer $customer)

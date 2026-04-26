@@ -142,6 +142,14 @@ new class extends Component
                         <i class="fas fa-layer-group mr-3"></i> Categories
                     </x-sidebar-link>
                     @endcan
+
+                    <x-sidebar-link :href="route('payment-methods.index')" :active="request()->routeIs('payment-methods.*')" wire:navigate>
+                        <i class="fas fa-credit-card mr-3"></i> Payment Methods
+                    </x-sidebar-link>
+
+                    <x-sidebar-link :href="route('invoice-templates.index')" :active="request()->routeIs('invoice-templates.*')" wire:navigate>
+                        <i class="fas fa-file-invoice mr-3"></i> Invoice Templates
+                    </x-sidebar-link>
                 </div>
             </div>
 
@@ -161,9 +169,13 @@ new class extends Component
                     </x-sidebar-link>
                     @endcan
                     
+                    <x-sidebar-link :href="route('orders.index')" :active="request()->routeIs('orders.*')" wire:navigate>
+                        <i class="fas fa-shopping-cart mr-3"></i> Orders
+                    </x-sidebar-link>
+
                     @can('viewSale')
                     <x-sidebar-link :href="route('sales.index')" :active="request()->routeIs('sales.*')" wire:navigate>
-                        <i class="fas fa-receipt mr-3"></i> Sales
+                        <i class="fas fa-receipt mr-3"></i> Sales History
                     </x-sidebar-link>
                     @endcan
 

@@ -72,7 +72,10 @@
                         </div>
                     </div>
 
-                    <div class="mt-12 flex justify-end">
+                    <div class="mt-12 flex justify-end gap-4">
+                        <a href="{{ route('reports.export', ['type' => 'profit-loss', 'start_date' => request('start_date'), 'end_date' => request('end_date')]) }}" class="bg-green-600 text-white px-6 py-2 rounded-md font-bold hover:bg-green-700 transition-colors">
+                            <i class="fas fa-file-excel mr-2"></i> Export Excel
+                        </a>
                         <button onclick="window.print()" class="bg-gray-800 text-white px-6 py-2 rounded-md font-bold hover:bg-black transition-colors">
                             <i class="fas fa-print mr-2"></i> Print Statement
                         </button>

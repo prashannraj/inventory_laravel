@@ -91,6 +91,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Sales Returns
     Route::resource('sale-returns', SaleReturnController::class);
 
+    // Orders Management
+    Route::resource('orders', OrderController::class);
+
     // Invoice Templates
     Route::resource('invoice-templates', InvoiceTemplateController::class);
 

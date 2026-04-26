@@ -14,4 +14,20 @@ class Customer extends Model
     {
         return $this->hasMany(Sale::class);
     }
+
+    public function getOutstandingBalanceAttribute()
+    {
+        return $this->sales()
+            ->where('payment_status', '!=', 'paid')
+            ->get()
+            ->sum(function ($sale) {
+                return $sale->net_amount - $sale->paid_amount;
+            });
+    }
+
+    public function canAfford($amount)
+    {
+        if ($this->credit_limit <= 0) return true;
+        return ($this->outstanding_balance + $amount) <= $this->credit_limit;
+    }
 }

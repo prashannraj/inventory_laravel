@@ -35,7 +35,8 @@ class RolePermissionSeeder extends Seeder
             'createAdjustment', 'updateAdjustment', 'viewAdjustment', 'deleteAdjustment',
             'createUnit', 'updateUnit', 'viewUnit', 'deleteUnit',
             'createTaxRate', 'updateTaxRate', 'viewTaxRate', 'deleteTaxRate',
-            'viewReports', 'updateCompany', 'viewProfile', 'updateSetting'
+            'viewReports', 'updateCompany', 'viewProfile', 'updateSetting',
+            'manageStock', 'viewCashFlow', 'managePayments', 'manageTemplates', 'manageOrders'
         ];
 
         // Create permissions

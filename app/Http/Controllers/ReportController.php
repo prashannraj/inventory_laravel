@@ -253,6 +253,56 @@ class ReportController extends Controller
                 $filename = 'stock_movements_report_' . date('Y_m_d') . '.xlsx';
                 $exportType = \Maatwebsite\Excel\Excel::XLSX;
                 break;
+
+            case 'profit-loss':
+                // Re-calculate profit and loss for export
+                $sales = Sale::whereBetween('date', [$start_date, $end_date])->sum('net_amount');
+                $saleReturns = SaleReturn::whereBetween('date', [$start_date, $end_date])->sum('total_amount');
+                $netSales = $sales - $saleReturns;
+                $cogs = DB::table('sale_items')
+                    ->join('sales', 'sales.id', '=', 'sale_items.sale_id')
+                    ->join('products', 'products.id', '=', 'sale_items.product_id')
+                    ->whereBetween('sales.date', [$start_date, $end_date])
+                    ->sum(DB::raw('sale_items.quantity * products.buying_price'));
+                $grossProfit = $netSales - $cogs;
+                $expenses = Expense::whereBetween('date', [$start_date, $end_date])->sum('amount');
+                $netProfit = $grossProfit - $expenses;
+
+                $exportData = collect([[
+                    'Period' => $start_date->format('Y-m-d') . ' to ' . $end_date->format('Y-m-d'),
+                    'Total Sales' => $sales,
+                    'Sale Returns' => $saleReturns,
+                    'Net Sales' => $netSales,
+                    'COGS' => $cogs,
+                    'Gross Profit' => $grossProfit,
+                    'Total Expenses' => $expenses,
+                    'Net Profit' => $netProfit,
+                ]]);
+
+                $filename = 'profit_loss_report_' . date('Y_m_d') . '.xlsx';
+                $exportType = \Maatwebsite\Excel\Excel::XLSX;
+                break;
+
+            case 'cash-flow':
+                // Re-calculate cash flow for export
+                $salePayments = SalePayment::whereBetween('date', [$start_date, $end_date])->sum('amount');
+                $expenses = Expense::whereBetween('date', [$start_date, $end_date])->sum('amount');
+                $purchases = Purchase::whereBetween('date', [$start_date, $end_date])->sum('net_amount');
+                $saleReturns = SaleReturn::whereBetween('date', [$start_date, $end_date])->sum('total_amount');
+                $netCashFlow = $salePayments - ($expenses + $purchases + $saleReturns);
+
+                $exportData = collect([[
+                    'Period' => $start_date->format('Y-m-d') . ' to ' . $end_date->format('Y-m-d'),
+                    'Cash In (Sale Payments)' => $salePayments,
+                    'Cash Out (Expenses)' => $expenses,
+                    'Cash Out (Purchases)' => $purchases,
+                    'Cash Out (Sale Returns)' => $saleReturns,
+                    'Net Cash Flow' => $netCashFlow,
+                ]]);
+
+                $filename = 'cash_flow_report_' . date('Y_m_d') . '.xlsx';
+                $exportType = \Maatwebsite\Excel\Excel::XLSX;
+                break;
                 
             default:
                 return back()->with('error', 'Invalid export type specified.');
