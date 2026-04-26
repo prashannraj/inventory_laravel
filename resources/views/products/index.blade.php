@@ -12,8 +12,26 @@
                     <div class="flex justify-between mb-4">
                         <h3 class="text-lg font-medium">Product List</h3>
                         <div class="flex space-x-2">
+                            <a href="{{ route('products.export') }}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                                <i class="fas fa-file-export mr-1"></i> Export
+                            </a>
+                            <div x-data="{ open: false }" class="relative">
+                                <button @click="open = !open" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">
+                                    <i class="fas fa-file-import mr-1"></i> Import
+                                </button>
+                                <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg py-1 z-10 border p-4">
+                                    <form action="{{ route('products.import') }}" method="POST" enctype="multipart/form-data">
+                                        @csrf
+                                        <div class="mb-2">
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Upload Excel/CSV</label>
+                                            <input type="file" name="file" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" required>
+                                        </div>
+                                        <button type="submit" class="w-full bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700">Upload & Import</button>
+                                    </form>
+                                </div>
+                            </div>
                             <a href="{{ route('products.create') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                                Add Product
+                                <i class="fas fa-plus mr-1"></i> Add Product
                             </a>
                         </div>
                     </div>

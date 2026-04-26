@@ -8,10 +8,11 @@
         </div>
     </x-slot>
 
-    <div class="py-6">
+    <div class="py-6" @keydown.window="handleShortcuts($event)">
         <div class="max-w-full mx-auto sm:px-4 lg:px-6">
             <div x-data="posSystem()" 
                  id="pos-container"
+                 x-init="init()"
                  data-products="{{ json_encode($products->map(fn($p) => [
                     'id' => $p->id,
                     'name' => $p->name,
@@ -27,13 +28,21 @@
                 <!-- Product Selection Area -->
                 <div class="lg:w-2/3">
                     <div class="bg-white p-4 rounded-lg shadow mb-6">
-                        <div class="flex gap-4 mb-4">
+                        <div class="flex gap-4 mb-4 items-center">
+                            <div class="flex-1">
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                                        <i class="fas fa-barcode"></i>
+                                    </span>
+                                    <input type="text" x-ref="barcodeInput" x-model="barcode" @keydown.enter.prevent="scanBarcode()" placeholder="Scan Barcode (SKU)..." class="pl-10 block w-full border-indigo-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm bg-indigo-50">
+                                </div>
+                            </div>
                             <div class="flex-1">
                                 <div class="relative">
                                     <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
                                         <i class="fas fa-search"></i>
                                     </span>
-                                    <input type="text" x-model="searchQuery" @input.debounce.300ms="filterProducts()" placeholder="Search product by name or SKU..." class="pl-10 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                    <input type="text" x-ref="searchInput" x-model="searchQuery" @input.debounce.300ms="filterProducts()" placeholder="Search product (F2)..." class="pl-10 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
                                 </div>
                             </div>
                             <div class="w-48">
@@ -155,12 +164,20 @@
                                         <span :class="paidAmount - grandTotal() >= 0 ? 'text-green-600' : 'text-red-600'" x-text="formatCurrency(Math.max(0, paidAmount - grandTotal()))"></span>
                                     </div>
                                     <button type="submit" :disabled="cart.length === 0" class="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white font-bold py-4 rounded-lg text-xl shadow-lg transition">
-                                        COMPLETE SALE
+                                        COMPLETE SALE (F10)
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </form>
+                    
+                    <div class="mt-4 bg-gray-100 p-3 rounded-lg text-xs text-gray-600 flex justify-between">
+                        <span><kbd class="px-2 py-1 bg-white border rounded shadow-sm font-bold">F2</kbd> Search</span>
+                        <span><kbd class="px-2 py-1 bg-white border rounded shadow-sm font-bold">F4</kbd> Payment</span>
+                        <span><kbd class="px-2 py-1 bg-white border rounded shadow-sm font-bold">F8</kbd> Clear Cart</span>
+                        <span><kbd class="px-2 py-1 bg-white border rounded shadow-sm font-bold">F10</kbd> Complete</span>
+                        <span><kbd class="px-2 py-1 bg-white border rounded shadow-sm font-bold">ESC</kbd> Focus Barcode</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -170,6 +187,7 @@
         function posSystem() {
             return {
                 products: JSON.parse(document.getElementById('pos-container').dataset.products || '[]'),
+                barcode: '',
                 searchQuery: '',
                 selectedCategory: '',
                 filteredProducts: [],
@@ -180,6 +198,41 @@
 
                 init() {
                     this.filteredProducts = this.products;
+                    this.$nextTick(() => {
+                        this.$refs.barcodeInput.focus();
+                    });
+                },
+
+                handleShortcuts(e) {
+                    if (e.key === 'F2') {
+                        e.preventDefault();
+                        this.$refs.searchInput.focus();
+                    } else if (e.key === 'F4') {
+                        e.preventDefault();
+                        document.querySelector('input[name="paid_amount"]').focus();
+                    } else if (e.key === 'F8') {
+                        e.preventDefault();
+                        if (confirm('Clear cart?')) this.cart = [];
+                    } else if (e.key === 'F10') {
+                        e.preventDefault();
+                        if (this.cart.length > 0) {
+                            document.querySelector('form').submit();
+                        }
+                    } else if (e.key === 'Escape') {
+                        this.$refs.barcodeInput.focus();
+                    }
+                },
+
+                scanBarcode() {
+                    if (!this.barcode) return;
+                    const product = this.products.find(p => p.sku.toLowerCase() === this.barcode.toLowerCase());
+                    if (product) {
+                        this.addToCart(product);
+                        this.barcode = '';
+                    } else {
+                        alert('Product not found with SKU/Barcode: ' + this.barcode);
+                        this.barcode = '';
+                    }
                 },
 
                 filterProducts() {

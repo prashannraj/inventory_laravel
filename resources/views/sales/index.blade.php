@@ -11,9 +11,14 @@
                 <div class="p-6 text-gray-900">
                     <div class="flex justify-between mb-4">
                         <h3 class="text-lg font-medium">Sales History</h3>
-                        <a href="{{ route('sales.pos') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">
-                            <i class="fas fa-cash-register mr-1"></i> POS Interface
-                        </a>
+                        <div class="space-x-2">
+                            <a href="{{ route('sales.create') }}" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                                <i class="fas fa-plus mr-1"></i> Manual Sale
+                            </a>
+                            <a href="{{ route('sales.pos') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">
+                                <i class="fas fa-cash-register mr-1"></i> POS Interface
+                            </a>
+                        </div>
                     </div>
 
                     <div class="overflow-x-auto">

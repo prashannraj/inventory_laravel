@@ -20,6 +20,8 @@ class StoreCustomerRequest extends FormRequest
             'tax_number' => 'nullable|string|max:50',
             'address' => 'nullable|string',
             'opening_balance' => 'nullable|numeric|min:0',
+            'credit_limit' => 'nullable|numeric|min:0',
+            'loyalty_points' => 'nullable|integer|min:0',
             'active' => 'boolean',
         ];
     }

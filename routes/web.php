@@ -18,6 +18,11 @@ use App\Http\Controllers\TaxRateController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\StockAdjustmentController;
+use App\Http\Controllers\StockTransferController;
+use App\Http\Controllers\SaleReturnController;
+use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\InvoiceTemplateController;
+use App\Http\Controllers\PaymentMethodController;
 
 Route::redirect('/', 'login');
 
@@ -61,12 +66,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('customers', CustomerController::class)->middleware('permission:viewCustomer');
 
     // Products Management
+    Route::get('products/export', [ProductController::class, 'export'])->name('products.export');
+    Route::post('products/import', [ProductController::class, 'import'])->name('products.import');
     Route::resource('products', ProductController::class)->middleware('permission:viewProduct');
     Route::post('products/{product}/stock', [ProductController::class, 'updateStock'])->name('products.stock.update');
     Route::get('products/{product}/movements', [ProductController::class, 'stockMovements'])->name('products.movements');
     
     // Purchases Management
     Route::resource('purchases', PurchaseController::class)->middleware('permission:viewPurchase');
+    Route::post('purchases/{purchase}/status', [PurchaseController::class, 'updateStatus'])->name('purchases.status.update');
     
     // Sales Management
     Route::resource('sales', SaleController::class)->middleware('permission:viewSale');
@@ -76,6 +84,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Stock Adjustments
     Route::resource('stock-adjustments', StockAdjustmentController::class)->middleware('permission:viewAdjustment');
 
+    // Stock Transfers
+    Route::resource('stock-transfers', StockTransferController::class);
+    Route::post('stock-transfers/{stock_transfer}/status', [StockTransferController::class, 'updateStatus'])->name('stock-transfers.status.update');
+
+    // Sales Returns
+    Route::resource('sale-returns', SaleReturnController::class);
+
+    // Invoice Templates
+    Route::resource('invoice-templates', InvoiceTemplateController::class);
+
+    // Payment Methods
+    Route::resource('payment-methods', PaymentMethodController::class);
+
+    // Expenses
+    Route::resource('expenses', ExpenseController::class);
+
     // Reports
     Route::prefix('reports')->name('reports.')->group(function () {
         Route::get('/', [ReportController::class, 'index'])->name('index')->middleware('permission:viewReports');
@@ -83,6 +107,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('purchases', [ReportController::class, 'purchases'])->name('purchases');
         Route::get('inventory', [ReportController::class, 'inventory'])->name('inventory');
         Route::get('stock', [ReportController::class, 'stock'])->name('stock');
+        Route::get('profit-loss', [ReportController::class, 'profitAndLoss'])->name('profit-loss');
+        Route::get('cash-flow', [ReportController::class, 'cashFlow'])->name('cash-flow');
         Route::get('export/{type}', [ReportController::class, 'export'])->name('export');
     });
     

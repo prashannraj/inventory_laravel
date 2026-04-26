@@ -36,6 +36,15 @@ class SaleController extends Controller
         return view('sales.pos', compact('customers', 'stores', 'products'));
     }
 
+    public function create()
+    {
+        $customers = Customer::where('active', true)->get();
+        $stores = Store::where('active', true)->get();
+        $products = Product::where('active', true)->get();
+
+        return view('sales.create', compact('customers', 'stores', 'products'));
+    }
+
     public function store(StoreSaleRequest $request)
     {
         try {
@@ -89,6 +98,20 @@ class SaleController extends Controller
             $data['tax_amount'] = $total_tax_amount; // Auto-calculated tax
             $data['net_amount'] = $total_amount - ($data['discount'] ?? 0) + $total_tax_amount;
             
+            // Check Customer Credit Limit
+            if (!empty($data['customer_id'])) {
+                $customer = Customer::find($data['customer_id']);
+                if ($customer && $customer->credit_limit > 0) {
+                    $due_amount = $data['net_amount'] - $data['paid_amount'];
+                    if ($due_amount > 0) {
+                        // Simplified check: only against this sale, but ideally against total outstanding balance
+                        if ($due_amount > $customer->credit_limit) {
+                            throw new \Exception("Customer credit limit exceeded. Limit: " . $customer->credit_limit);
+                        }
+                    }
+                }
+            }
+
             // Determine payment status (based on net amount with auto-calculated tax)
             if ($data['paid_amount'] >= $data['net_amount']) {
                 $data['payment_status'] = 'paid';
@@ -99,6 +122,16 @@ class SaleController extends Controller
             }
 
             $sale = Sale::create($data);
+            
+            // Add Loyalty Points
+            if (!empty($sale->customer_id)) {
+                $customer = $sale->customer;
+                if ($customer) {
+                    // 1 point per 100 net_amount
+                    $points = floor($sale->net_amount / 100);
+                    $customer->increment('loyalty_points', $points);
+                }
+            }
 
             // Save items and update stock
             foreach ($items_with_tax as $item) {

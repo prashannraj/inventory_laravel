@@ -43,6 +43,16 @@
                                 <x-input-error :messages="$errors->get('opening_balance')" class="mt-2" />
                             </div>
                             <div class="mb-4">
+                                <x-input-label for="credit_limit" :value="__('Credit Limit')" />
+                                <x-text-input id="credit_limit" class="block mt-1 w-full" type="number" step="0.01" name="credit_limit" :value="old('credit_limit', 0)" />
+                                <x-input-error :messages="$errors->get('credit_limit')" class="mt-2" />
+                            </div>
+                            <div class="mb-4">
+                                <x-input-label for="loyalty_points" :value="__('Initial Loyalty Points')" />
+                                <x-text-input id="loyalty_points" class="block mt-1 w-full" type="number" name="loyalty_points" :value="old('loyalty_points', 0)" />
+                                <x-input-error :messages="$errors->get('loyalty_points')" class="mt-2" />
+                            </div>
+                            <div class="mb-4">
                                 <label class="inline-flex items-center mt-8">
                                     <input type="checkbox" name="active" value="1" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" {{ old('active', true) ? 'checked' : '' }}>
                                     <span class="ms-2 text-sm text-gray-600">{{ __('Active') }}</span>

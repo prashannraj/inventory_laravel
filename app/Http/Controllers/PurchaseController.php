@@ -8,6 +8,7 @@ use App\Models\Supplier;
 use App\Models\Store;
 use App\Models\TaxRate;
 use App\Http\Requests\StorePurchaseRequest;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -126,6 +127,68 @@ class PurchaseController extends Controller
     {
         $purchase->load(['supplier', 'store', 'user', 'items.product.taxRate']);
         return view('purchases.show', compact('purchase'));
+    }
+
+    public function updateStatus(Request $request, Purchase $purchase)
+    {
+        $request->validate([
+            'status' => 'required|in:pending,ordered,received,cancelled',
+        ]);
+
+        $oldStatus = $purchase->status;
+        $newStatus = $request->status;
+
+        DB::beginTransaction();
+        try {
+            $purchase->status = $newStatus;
+            $purchase->save();
+
+            // If changing to 'received', update stock
+            if ($oldStatus !== 'received' && $newStatus === 'received') {
+                foreach ($purchase->items as $item) {
+                    $product = Product::find($item->product_id);
+                    $product->increment('qty', $item->quantity);
+                    
+                    // Log stock movement
+                    $product->stockMovements()->create([
+                        'store_id' => $purchase->store_id,
+                        'type' => 'in',
+                        'quantity' => $item->quantity,
+                        'unit_cost' => $item->cost_price,
+                        'user_id' => Auth::id(),
+                        'reference_id' => $purchase->id,
+                        'reference_type' => Purchase::class,
+                        'notes' => 'Purchase received: ' . $purchase->purchase_no,
+                    ]);
+                }
+            }
+
+            // If changing from 'received' to another status, reverse stock
+            if ($oldStatus === 'received' && $newStatus !== 'received') {
+                foreach ($purchase->items as $item) {
+                    $product = Product::find($item->product_id);
+                    $product->decrement('qty', $item->quantity);
+                    
+                    // Log stock movement reversal
+                    $product->stockMovements()->create([
+                        'store_id' => $purchase->store_id,
+                        'type' => 'out',
+                        'quantity' => $item->quantity,
+                        'unit_cost' => $item->cost_price,
+                        'user_id' => Auth::id(),
+                        'reference_id' => $purchase->id,
+                        'reference_type' => Purchase::class,
+                        'notes' => 'Purchase status changed from received to ' . $newStatus . ': ' . $purchase->purchase_no,
+                    ]);
+                }
+            }
+
+            DB::commit();
+            return back()->with('success', 'Purchase status updated successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Error updating purchase status: ' . $e->getMessage());
+        }
     }
 
     public function destroy(Purchase $purchase)

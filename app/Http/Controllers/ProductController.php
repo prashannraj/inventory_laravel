@@ -9,6 +9,9 @@ use App\Models\Store;
 use App\Models\Unit;
 use App\Models\TaxRate;
 use App\Models\ProductImage;
+use App\Exports\ProductsExport;
+use App\Imports\ProductsImport;
+use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use Illuminate\Http\Request;
@@ -128,5 +131,24 @@ class ProductController extends Controller
         
         $product->delete();
         return redirect()->route('products.index')->with('success', 'Product deleted successfully.');
+    }
+
+    public function export()
+    {
+        return Excel::download(new ProductsExport, 'products.xlsx');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv',
+        ]);
+
+        try {
+            Excel::import(new ProductsImport, $request->file('file'));
+            return back()->with('success', 'Products imported successfully.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error importing products: ' . $e->getMessage());
+        }
     }
 }

@@ -47,6 +47,24 @@
                             <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ $statusColors[$purchase->status] }}">
                                 {{ ucfirst($purchase->status) }}
                             </span>
+                            
+                            @if(auth()->user()->can('updatePurchase'))
+                            <form method="POST" action="{{ route('purchases.status.update', $purchase) }}" class="mt-2">
+                                @csrf
+                                <div class="flex items-center space-x-2">
+                                    <select name="status" class="text-sm border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                        <option value="pending" {{ $purchase->status == 'pending' ? 'selected' : '' }}>Pending</option>
+                                        <option value="ordered" {{ $purchase->status == 'ordered' ? 'selected' : '' }}>Ordered</option>
+                                        <option value="received" {{ $purchase->status == 'received' ? 'selected' : '' }}>Received</option>
+                                        <option value="cancelled" {{ $purchase->status == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                                    </select>
+                                    <button type="submit" class="px-3 py-1 bg-indigo-600 text-white text-xs font-semibold rounded-md hover:bg-indigo-700">
+                                        Update
+                                    </button>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">Changing to "Received" will update stock levels.</p>
+                            </form>
+                            @endif
                         </div>
                     </div>
 

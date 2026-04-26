@@ -78,6 +78,16 @@
                     <h4 class="font-bold text-lg mb-1">Inventory Report</h4>
                     <p class="text-sm text-gray-500">Real-time stock levels, valuations and low stock alerts.</p>
                 </a>
+                <a href="{{ route('reports.profit-loss') }}" class="block p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition border border-gray-100">
+                    <div class="text-red-600 text-3xl mb-3"><i class="fas fa-chart-line"></i></div>
+                    <h4 class="font-bold text-lg mb-1">Profit & Loss</h4>
+                    <p class="text-sm text-gray-500">Financial statement that summarizes the revenues, costs, and expenses.</p>
+                </a>
+                <a href="{{ route('reports.cash-flow') }}" class="block p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition border border-gray-100">
+                    <div class="text-blue-600 text-3xl mb-3"><i class="fas fa-money-bill-wave"></i></div>
+                    <h4 class="font-bold text-lg mb-1">Cash Flow</h4>
+                    <p class="text-sm text-gray-500">Statement showing incoming and outgoing cash and cash equivalents.</p>
+                </a>
             </div>
         </div>
     </div>
