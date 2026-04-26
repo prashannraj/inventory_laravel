@@ -61,7 +61,7 @@ class PurchaseController extends Controller
                 $item_total = $item['quantity'] * $item['cost_price'];
                 $total_amount += $item_total;
                 
-                // Calculate tax for this item
+                // Calculate tax for this item (based on product tax rate)
                 $product = $products[$item['product_id']] ?? null;
                 $tax_rate = $product->taxRate ?? null;
                 $item_tax_amount = 0;
@@ -82,9 +82,33 @@ class PurchaseController extends Controller
                 ];
             }
             
+            // Determine final tax amount: manual override takes precedence
+            $manual_tax_amount = $data['tax_amount'] ?? null;
+            $manual_tax_rate = $data['tax_rate'] ?? null;
+            $final_tax_amount = $total_tax_amount;
+            
+            if ($manual_tax_amount !== null && $manual_tax_amount != $total_tax_amount) {
+                // Use manual tax amount, redistribute across items proportionally
+                $final_tax_amount = $manual_tax_amount;
+                if ($total_amount > 0) {
+                    foreach ($items_with_tax as &$item) {
+                        $item['tax_amount'] = ($item['subtotal'] / $total_amount) * $final_tax_amount;
+                    }
+                }
+            } elseif ($manual_tax_rate !== null && $manual_tax_rate > 0) {
+                // Calculate tax based on manual tax rate
+                $taxable_amount = $total_amount - ($data['discount'] ?? 0);
+                $final_tax_amount = $taxable_amount * ($manual_tax_rate / 100);
+                if ($total_amount > 0) {
+                    foreach ($items_with_tax as &$item) {
+                        $item['tax_amount'] = ($item['subtotal'] / $total_amount) * $final_tax_amount;
+                    }
+                }
+            }
+            
             $data['total_amount'] = $total_amount;
-            $data['tax_amount'] = $total_tax_amount; // Auto-calculated tax
-            $data['net_amount'] = $total_amount - ($data['discount'] ?? 0) + $total_tax_amount;
+            $data['tax_amount'] = $final_tax_amount;
+            $data['net_amount'] = $total_amount - ($data['discount'] ?? 0) + $final_tax_amount;
 
             // Handle document upload
             if ($request->hasFile('document')) {

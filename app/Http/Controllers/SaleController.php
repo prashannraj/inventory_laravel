@@ -59,6 +59,7 @@ class SaleController extends Controller
             
             // Calculate totals and tax
             $total_amount = 0;
+            $total_net_amount = 0;
             $total_tax_amount = 0;
             $items_with_tax = [];
             
@@ -71,6 +72,7 @@ class SaleController extends Controller
                 $item_discount = $item['discount'] ?? 0;
                 $item_net = $item_subtotal - $item_discount;
                 $total_amount += $item_subtotal;
+                $total_net_amount += $item_net;
                 
                 // Calculate tax for this item
                 $product = $products[$item['product_id']] ?? null;
@@ -95,9 +97,33 @@ class SaleController extends Controller
                 ];
             }
             
+            // Determine final tax amount: manual override takes precedence
+            $manual_tax_amount = $data['tax_amount'] ?? null;
+            $manual_tax_rate = $data['tax_rate'] ?? null;
+            $final_tax_amount = $total_tax_amount;
+            
+            if ($manual_tax_amount !== null && $manual_tax_amount != $total_tax_amount) {
+                // Use manual tax amount, redistribute across items proportionally based on item_net
+                $final_tax_amount = $manual_tax_amount;
+                if ($total_net_amount > 0) {
+                    foreach ($items_with_tax as &$item) {
+                        $item['tax_amount'] = ($item['subtotal'] / $total_net_amount) * $final_tax_amount;
+                    }
+                }
+            } elseif ($manual_tax_rate !== null && $manual_tax_rate > 0) {
+                // Calculate tax based on manual tax rate applied to taxable amount (total_net_amount - order discount)
+                $taxable_amount = $total_net_amount - ($data['discount'] ?? 0);
+                $final_tax_amount = $taxable_amount * ($manual_tax_rate / 100);
+                if ($total_net_amount > 0) {
+                    foreach ($items_with_tax as &$item) {
+                        $item['tax_amount'] = ($item['subtotal'] / $total_net_amount) * $final_tax_amount;
+                    }
+                }
+            }
+            
             $data['total_amount'] = $total_amount;
-            $data['tax_amount'] = $total_tax_amount; // Auto-calculated tax
-            $data['net_amount'] = $total_amount - ($data['discount'] ?? 0) + $total_tax_amount;
+            $data['tax_amount'] = $final_tax_amount;
+            $data['net_amount'] = $total_amount - ($data['discount'] ?? 0) + $final_tax_amount;
             
             // Check Customer Credit Limit
             if (!empty($data['customer_id'])) {

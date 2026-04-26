@@ -98,6 +98,14 @@
                                         <span>Order Discount:</span>
                                         <input type="number" name="discount" x-model.number="orderDiscount" step="0.01" class="w-32 text-right border-gray-300 rounded-md shadow-sm text-sm">
                                     </div>
+                                    <div class="flex justify-between items-center">
+                                        <span>Tax Rate (%):</span>
+                                        <input type="number" name="tax_rate" x-model.number="taxRate" step="0.01" class="w-32 text-right border-gray-300 rounded-md shadow-sm text-sm" @input="updateTaxAmountFromRate()">
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span>Tax Amount:</span>
+                                        <input type="number" name="tax_amount" x-model.number="taxAmount" step="0.01" class="w-32 text-right border-gray-300 rounded-md shadow-sm text-sm" @input="updateTaxRateFromAmount()">
+                                    </div>
                                     <div class="flex justify-between text-xl font-bold border-t pt-2 text-indigo-600">
                                         <span>Total:</span>
                                         <span x-text="formatCurrency(grandTotal())"></span>
@@ -135,6 +143,8 @@
             return {
                 items: [{ product_id: '', unit_price: 0, quantity: 1, discount: 0 }],
                 orderDiscount: 0,
+                taxRate: 0,
+                taxAmount: 0,
                 paidAmount: 0,
 
                 addItem() {
@@ -158,8 +168,28 @@
                     return this.items.reduce((sum, item) => sum + (item.unit_price * item.quantity - (item.discount || 0)), 0);
                 },
 
+                taxableAmount() {
+                    return this.subtotal() - (this.orderDiscount || 0);
+                },
+
+                updateTaxAmountFromRate() {
+                    // Calculate tax amount based on tax rate
+                    const taxable = this.taxableAmount();
+                    this.taxAmount = taxable * (this.taxRate / 100);
+                },
+
+                updateTaxRateFromAmount() {
+                    // Calculate tax rate based on tax amount
+                    const taxable = this.taxableAmount();
+                    if (taxable > 0) {
+                        this.taxRate = (this.taxAmount / taxable) * 100;
+                    } else {
+                        this.taxRate = 0;
+                    }
+                },
+
                 grandTotal() {
-                    return Math.max(0, this.subtotal() - (this.orderDiscount || 0));
+                    return Math.max(0, this.taxableAmount() + (this.taxAmount || 0));
                 },
 
                 formatCurrency(amount) {

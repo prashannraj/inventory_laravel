@@ -15,5 +15,12 @@ class Company extends Model
         'country',
         'message',
         'currency',
+        'city',
+        'state',
+        'postal_code',
+        'email',
+        'tax_id',
+        'logo',
+        'website',
     ];
 }

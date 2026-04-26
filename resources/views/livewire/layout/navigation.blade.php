@@ -147,6 +147,24 @@ new class extends Component
                         <i class="fas fa-credit-card mr-3"></i> Payment Methods
                     </x-sidebar-link>
 
+                    @can('viewStore')
+                    <x-sidebar-link :href="route('stores.index')" :active="request()->routeIs('stores.*')" wire:navigate>
+                        <i class="fas fa-store mr-3"></i> Stores
+                    </x-sidebar-link>
+                    @endcan
+
+                    @can('viewTaxRate')
+                    <x-sidebar-link :href="route('tax-rates.index')" :active="request()->routeIs('tax-rates.*')" wire:navigate>
+                        <i class="fas fa-percent mr-3"></i> Tax Rates
+                    </x-sidebar-link>
+                    @endcan
+
+                    @can('viewUnit')
+                    <x-sidebar-link :href="route('units.index')" :active="request()->routeIs('units.*')" wire:navigate>
+                        <i class="fas fa-ruler mr-3"></i> Units
+                    </x-sidebar-link>
+                    @endcan
+
                     <x-sidebar-link :href="route('invoice-templates.index')" :active="request()->routeIs('invoice-templates.*')" wire:navigate>
                         <i class="fas fa-file-invoice mr-3"></i> Invoice Templates
                     </x-sidebar-link>

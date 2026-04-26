@@ -22,6 +22,7 @@ class StorePurchaseRequest extends FormRequest
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.cost_price' => 'required|numeric|min:0',
             'discount' => 'nullable|numeric|min:0',
+            'tax_rate' => 'nullable|numeric|min:0|max:100',
             'tax_amount' => 'nullable|numeric|min:0',
             'notes' => 'nullable|string',
             'status' => 'required|in:pending,ordered,received,cancelled',
