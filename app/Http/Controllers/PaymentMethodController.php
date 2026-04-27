@@ -23,11 +23,23 @@ class PaymentMethodController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'type' => 'required|in:offline,online',
+            'gateway' => 'nullable|in:esewa,khalti',
             'details' => 'nullable|string',
             'active' => 'boolean',
         ]);
 
-        PaymentMethod::create($request->all());
+        // If gateway is set, ensure type is online
+        $data = $request->all();
+        if (!empty($data['gateway'])) {
+            $data['type'] = 'online';
+        }
+
+        // Handle checkbox: if active is not present in request, set it to false
+        if (!isset($data['active'])) {
+            $data['active'] = false;
+        }
+
+        PaymentMethod::create($data);
 
         return redirect()->route('payment-methods.index')->with('success', 'Payment method created successfully.');
     }
@@ -42,11 +54,22 @@ class PaymentMethodController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'type' => 'required|in:offline,online',
+            'gateway' => 'nullable|in:esewa,khalti',
             'details' => 'nullable|string',
             'active' => 'boolean',
         ]);
 
-        $paymentMethod->update($request->all());
+        $data = $request->all();
+        if (!empty($data['gateway'])) {
+            $data['type'] = 'online';
+        }
+
+        // Handle checkbox: if active is not present in request, set it to false
+        if (!isset($data['active'])) {
+            $data['active'] = false;
+        }
+
+        $paymentMethod->update($data);
 
         return redirect()->route('payment-methods.index')->with('success', 'Payment method updated successfully.');
     }

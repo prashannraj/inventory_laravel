@@ -27,14 +27,31 @@
                                 <x-input-error class="mt-2" :messages="$errors->get('type')" />
                             </div>
 
+                            <div>
+                                <x-input-label for="gateway" :value="__('Gateway (Optional)')" />
+                                <select id="gateway" name="gateway" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                    <option value="">-- Select Gateway --</option>
+                                    <option value="esewa">eSewa</option>
+                                    <option value="khalti">Khalti</option>
+                                </select>
+                                <p class="mt-1 text-xs text-gray-500">Select a payment gateway if applicable.</p>
+                                <x-input-error class="mt-2" :messages="$errors->get('gateway')" />
+                            </div>
+
                             <div class="md:col-span-2">
                                 <x-input-label for="details" :value="__('Configuration Details (Optional)')" />
-                                <textarea id="details" name="details" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" rows="3">{{ old('details') }}</textarea>
-                                <p class="mt-1 text-xs text-gray-500">For online gateways, add API keys or merchant IDs here.</p>
+                                <textarea id="details" name="details" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" rows="5" placeholder='{
+  "merchant_code": "EPAYTEST",
+  "secret_key": "8gBm/:&EnhH.1/q",
+  "payment_url": "https://rc-epay.esewa.com.np/api/epay/main/v2/form",
+  "success_url": "http://localhost:8000/esewa/success"
+}'>{{ old('details') }}</textarea>
+                                <p class="mt-1 text-xs text-gray-500">For online gateways, add API keys or merchant IDs here in JSON format. Example above for eSewa.</p>
                                 <x-input-error class="mt-2" :messages="$errors->get('details')" />
                             </div>
 
                             <div class="flex items-center">
+                                <input type="hidden" name="active" value="0" />
                                 <input id="active" name="active" type="checkbox" value="1" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" checked />
                                 <span class="ml-2 text-sm text-gray-600">{{ __('Active') }}</span>
                             </div>

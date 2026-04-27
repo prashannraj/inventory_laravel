@@ -1,19 +1,20 @@
 # Inventory Management System with POS Features - Complete User Guide
 
 ## 📋 Table of Contents
-1. [Introduction & System Overview](#introduction--system-overview)
-2. [Getting Started](#getting-started)
-3. [Dashboard Navigation](#dashboard-navigation)
-4. [Product Management](#product-management)
-5. [Inventory Control](#inventory-control)
-6. [Point of Sale (POS) System](#point-of-sale-pos-system)
-7. [Sales & Invoicing](#sales--invoicing)
-8. [Purchase Management](#purchase-management)
-9. [Supplier & Customer Management](#supplier--customer-management)
-10. [Reporting & Analytics](#reporting--analytics)
-11. [User Management & Permissions](#user-management--permissions)
-12. [Company Settings](#company-settings)
-13. [Troubleshooting & Support](#troubleshooting--support)
+1. [Introduction & System Overview](#1-introduction-system-overview)
+2. [Getting Started](#2-getting-started)
+3. [Dashboard Navigation](#3-dashboard-navigation)
+4. [Product Management](#4-product-management)
+5. [Inventory Control](#5-inventory-control)
+6. [Point of Sale (POS) System](#6-point-of-sale-pos-system)
+7. [Sales & Invoicing](#7-sales-invoicing)
+8. [Purchase Management](#8-purchase-management)
+9. [Supplier & Customer Management](#9-supplier-customer-management)
+10. [Reporting & Analytics](#10-reporting-analytics)
+11. [User Management & Permissions](#11-user-management-permissions)
+12. [Company Settings](#12-company-settings)
+13. [Payment Gateway Integration](#13-payment-gateway-integration)
+14. [Troubleshooting & Support](#14-troubleshooting-support)
 
 ---
 
@@ -860,9 +861,149 @@ Notes: Damage discovered during monthly stock check
 
 ---
 
-## 13. Troubleshooting & Support
+## 13. Payment Gateway Integration
 
-### 13.1 Common Issues & Solutions
+The system supports integration with popular Nepali payment gateways like eSewa and Khalti for digital payments. This section covers configuration and usage of these payment gateways.
+
+### 13.1 eSewa Integration
+
+#### Configuration
+1. **Environment Variables**: Add the following to your `.env` file:
+   ```
+   ESEWA_MERCHANT_CODE=EPAYTEST
+   ESEWA_SECRET_KEY=8gBm/:&EnhH.1/q
+   ESEWA_PAYMENT_URL=https://rc-epay.esewa.com.np/api/epay/main/v2/form
+   ESEWA_VERIFICATION_URL=https://uat.esewa.com.np/api/epay/transaction/status/
+   ESEWA_SUCCESS_URL=http://yourdomain.com/esewa/success
+   ESEWA_FAILURE_URL=http://yourdomain.com/esewa/failure
+   ```
+
+2. **Configuration File**: Settings are stored in `config/esewa.php`. You can adjust tax, service charge, and delivery charge as needed.
+
+#### Usage Examples
+
+**Initiating a Payment**
+```php
+use App\Services\EsewaService;
+
+$esewaService = new EsewaService();
+$amount = 1000; // NPR
+$transactionId = $esewaService->generateTransactionId();
+$productName = "Product Purchase";
+
+$formData = $esewaService->getPaymentFormData($amount, $transactionId, $productName);
+$paymentUrl = $esewaService->getPaymentUrl();
+
+// Redirect user to eSewa payment page with form data
+```
+
+**Verifying Payment (Callback)**
+```php
+$base64Data = request()->query('data');
+$verificationResult = $esewaService->verifyPayment($base64Data);
+
+if ($verificationResult['success']) {
+    // Payment successful, update order status
+    $transactionId = $verificationResult['data']['transaction_uuid'];
+    $amount = $verificationResult['data']['total_amount'];
+} else {
+    // Handle payment failure
+}
+```
+
+#### Routes
+- `GET /esewa/checkout` - Show payment form
+- `POST /esewa/pay` - Initiate payment
+- `GET /esewa/success` - Handle successful payment callback
+- `GET /esewa/failure` - Handle failed payment
+
+### 13.2 Khalti Integration
+
+#### Configuration
+1. **Environment Variables**: Add to `.env`:
+   ```
+   KHALTI_SECRET_KEY_TEST=test_secret_key_XXXX
+   KHALTI_PUBLIC_KEY_TEST=test_public_key_XXXX
+   KHALTI_SECRET_KEY=your_live_secret_key
+   KHALTI_PUBLIC_KEY=your_live_public_key
+   KHALTI_TEST_MODE=true
+   KHALTI_BASE_URL=https://a.khalti.com/api/v2/
+   KHALTI_RETURN_URL=http://yourdomain.com/khalti/callback
+   KHALTI_WEBSITE_URL=http://yourdomain.com
+   ```
+
+2. **Configuration File**: `config/khalti.php` contains all settings including currency conversion (NPR to paisa).
+
+#### Usage Examples
+
+**Initiating a Payment**
+```php
+use App\Services\KhaltiService;
+
+$khaltiService = new KhaltiService();
+$amount = 500; // NPR
+$orderId = $khaltiService->generateOrderId();
+$orderName = "Order #123";
+
+$result = $khaltiService->initiatePayment($amount, $orderId, $orderName);
+
+if ($result['success']) {
+    // Redirect user to Khalti payment page
+    return redirect($result['payment_url']);
+} else {
+    // Handle error
+    return back()->with('error', $result['message']);
+}
+```
+
+**Verifying Payment**
+```php
+$pidx = request()->query('pidx');
+$verificationResult = $khaltiService->verifyPayment($pidx);
+
+if ($verificationResult['success'] && $verificationResult['status'] === 'Completed') {
+    // Payment completed successfully
+    $transactionId = $verificationResult['transaction_id'];
+    $amount = $verificationResult['amount'];
+} else {
+    // Payment failed or pending
+}
+```
+
+#### Routes
+- `GET /khalti/checkout` - Show payment form
+- `POST /khalti/pay` - Initiate payment
+- `GET /khalti/callback` - Handle Khalti callback
+
+### 13.3 Testing Payment Gateways
+
+**eSewa Sandbox**
+- Use merchant code: `EPAYTEST`
+- Use secret key: `8gBm/:&EnhH.1/q`
+- Test cards: Not required for eSewa sandbox (simulated payments)
+
+**Khalti Sandbox**
+- Enable test mode: `KHALTI_TEST_MODE=true`
+- Use test credentials from Khalti merchant dashboard
+- Test mobile number: `9800000000` (for Khalti sandbox)
+
+### 13.4 Troubleshooting Payment Issues
+
+**Common Issues**
+1. **Signature mismatch (eSewa)**: Ensure secret key matches and signature generation uses correct message format.
+2. **Payment verification fails**: Check that verification URLs are correct and accessible from your server.
+3. **Callback not received**: Verify return URLs are publicly accessible and correctly configured in payment gateway dashboard.
+4. **Amount mismatch**: Khalti expects amount in paisa (multiply NPR by 100).
+
+**Logs**
+- Check `storage/logs/laravel.log` for payment gateway errors.
+- Enable debug logging in `.env`: `APP_DEBUG=true`
+
+---
+
+## 14. Troubleshooting & Support
+
+### 14.1 Common Issues & Solutions
 
 **Issue 1: Cannot Login**
 - **Solution**: Check username/password, reset if needed
@@ -889,7 +1030,7 @@ Notes: Damage discovered during monthly stock check
 - **Verify**: Printer driver installation
 - **Test**: Print test page from system
 
-### 13.2 Data Backup & Recovery
+### 14.2 Data Backup & Recovery
 **Regular Backups:**
 - **Automatic**: Daily system backups
 - **Manual**: Export data before major changes
@@ -900,7 +1041,7 @@ Notes: Damage discovered during monthly stock check
 - Contact technical support
 - Use audit trail to reconstruct data
 
-### 13.3 Getting Help
+### 14.3 Getting Help
 **Support Channels:**
 - **In-app Help**: Click help icon in top-right
 - **Email Support**: support@yourcompany.com
@@ -915,7 +1056,7 @@ Notes: Damage discovered during monthly stock check
 4. Provide your user ID and store location
 5. Mention steps already tried
 
-### 13.4 System Maintenance
+### 14.4 System Maintenance
 **Daily Tasks:**
 - Verify backup completion
 - Check system alerts

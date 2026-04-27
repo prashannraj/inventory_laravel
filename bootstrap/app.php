@@ -16,6 +16,13 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
         ]);
+
+        // Exclude payment gateway callbacks from CSRF protection
+        $middleware->validateCsrfTokens(except: [
+            'esewa/success',
+            'esewa/failure',
+            'khalti/callback',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

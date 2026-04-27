@@ -23,6 +23,9 @@ use App\Http\Controllers\SaleReturnController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\InvoiceTemplateController;
 use App\Http\Controllers\PaymentMethodController;
+use App\Http\Controllers\EsewaController;
+use App\Http\Controllers\KhaltiController;
+use App\Http\Controllers\PaymentController;
 
 Route::redirect('/', 'login');
 
@@ -119,6 +122,29 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::prefix('company')->name('company.')->group(function () {
         Route::get('/', [CompanyController::class, 'edit'])->name('edit')->middleware('permission:updateCompany');
         Route::put('/', [CompanyController::class, 'update'])->name('update')->middleware('permission:updateCompany');
+    });
+
+    // Payment Gateway Routes
+    Route::prefix('payments')->name('payments.')->group(function () {
+        Route::get('/history', [PaymentController::class, 'history'])->name('history');
+    });
+    Route::get('/payment/success', [PaymentController::class, 'success'])->name('payment.success');
+    Route::get('/payment/failed', [PaymentController::class, 'failed'])->name('payment.failed');
+    Route::get('/payment', [PaymentController::class, 'index'])->name('payment.index');
+
+    // eSewa Routes
+    Route::prefix('esewa')->name('esewa.')->group(function () {
+        Route::get('/checkout', [EsewaController::class, 'showPaymentForm'])->name('checkout');
+        Route::post('/pay', [EsewaController::class, 'initiatePayment'])->name('pay');
+        Route::get('/success', [EsewaController::class, 'paymentSuccess'])->name('success');
+        Route::get('/failure', [EsewaController::class, 'paymentFailure'])->name('failure');
+    });
+
+    // Khalti Routes
+    Route::prefix('khalti')->name('khalti.')->group(function () {
+        Route::get('/checkout', [KhaltiController::class, 'showPaymentForm'])->name('checkout');
+        Route::post('/pay', [KhaltiController::class, 'initiatePayment'])->name('pay');
+        Route::get('/callback', [KhaltiController::class, 'handleCallback'])->name('callback');
     });
 
     // Documentation

@@ -115,15 +115,20 @@
                                             <div>
                                                 <x-input-label for="payment_method" :value="__('Payment Method')" />
                                                 <select name="payment_method" id="payment_method" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                                                    <option value="cash">Cash</option>
-                                                    <option value="card">Card</option>
-                                                    <option value="bank_transfer">Bank Transfer</option>
+                                                    <option value="">Select Payment Method</option>
+                                                    @foreach($paymentMethods as $method)
+                                                        <option value="{{ $method->name }}" data-gateway="{{ $method->gateway }}">{{ $method->name }}</option>
+                                                    @endforeach
                                                 </select>
                                             </div>
                                             <div>
                                                 <x-input-label for="paid_amount" :value="__('Paid Amount')" />
                                                 <input type="number" name="paid_amount" x-model.number="paidAmount" step="0.01" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
                                             </div>
+                                        </div>
+                                        <div id="online-payment-notice" class="hidden p-3 bg-blue-50 border border-blue-200 rounded text-sm text-blue-700">
+                                            <i class="fas fa-info-circle mr-1"></i>
+                                            <span id="gateway-message"></span> payment will be processed after order confirmation.
                                         </div>
                                         <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-700 transition shadow-lg">
                                             CREATE ORDER
@@ -225,5 +230,32 @@
                 }
             }
         }
+
+        // Handle online payment method selection
+        document.addEventListener('DOMContentLoaded', function() {
+            const paymentMethodSelect = document.getElementById('payment_method');
+            const onlinePaymentNotice = document.getElementById('online-payment-notice');
+            const gatewayMessage = document.getElementById('gateway-message');
+            
+            if (paymentMethodSelect) {
+                paymentMethodSelect.addEventListener('change', function() {
+                    const selectedOption = this.options[this.selectedIndex];
+                    const gateway = selectedOption.getAttribute('data-gateway');
+                    
+                    if (gateway && (gateway === 'esewa' || gateway === 'khalti')) {
+                        onlinePaymentNotice.classList.remove('hidden');
+                        gatewayMessage.textContent = gateway.charAt(0).toUpperCase() + gateway.slice(1);
+                        
+                        // Auto-set paid amount to grand total for online payments
+                        const grandTotal = document.querySelector('[x-data="saleItems()"]')?.__x.$data.grandTotal();
+                        if (grandTotal) {
+                            document.querySelector('input[name="paid_amount"]').value = grandTotal.toFixed(2);
+                        }
+                    } else {
+                        onlinePaymentNotice.classList.add('hidden');
+                    }
+                });
+            }
+        });
     </script>
 </x-app-layout>

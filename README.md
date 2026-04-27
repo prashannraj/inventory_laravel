@@ -37,7 +37,7 @@ The **Dashboard** is your central command center. It provides real-time insights
 - **High-Speed Checkout**: A dedicated interface for quick retail sales.
 - **Product Search**: Find items instantly by name or SKU.
 - **Cart Management**: Add items, adjust quantities, and apply discounts on the fly.
-- **Multi-Payment**: Supports Cash and Card payments with automatic change calculation.
+- **Multi-Payment**: Supports Cash, Card, eSewa, and Khalti payments with automatic change calculation.
 
 ### 6. Sales History
 - View itemized invoices for every transaction.

@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\Customer;
 use App\Models\Store;
 use App\Models\TaxRate;
+use App\Models\PaymentMethod;
 use App\Http\Requests\StoreSaleRequest;
 use App\Http\Requests\UpdateSaleRequest;
 use Illuminate\Support\Facades\DB;
@@ -33,8 +34,9 @@ class SaleController extends Controller
         }
 
         $products = Product::where('active', true)->where('qty', '>', 0)->get();
+        $paymentMethods = PaymentMethod::where('active', true)->get();
         
-        return view('sales.pos', compact('customers', 'stores', 'products'));
+        return view('sales.pos', compact('customers', 'stores', 'products', 'paymentMethods'));
     }
 
     public function create()
@@ -42,8 +44,9 @@ class SaleController extends Controller
         $customers = Customer::where('active', true)->get();
         $stores = Store::where('active', true)->get();
         $products = Product::with('taxRate')->where('active', true)->get();
+        $paymentMethods = PaymentMethod::where('active', true)->get();
 
-        return view('sales.create', compact('customers', 'stores', 'products'));
+        return view('sales.create', compact('customers', 'stores', 'products', 'paymentMethods'));
     }
 
     public function store(StoreSaleRequest $request)
@@ -138,8 +141,16 @@ class SaleController extends Controller
                 }
             }
 
+            // Check if payment method is an online gateway
+            $paymentMethod = PaymentMethod::where('name', $data['payment_method'])->first();
+            $isOnlinePayment = $paymentMethod && $paymentMethod->gateway && in_array($paymentMethod->gateway, ['esewa', 'khalti']);
+            
             // Determine payment status (based on net amount with auto-calculated tax)
-            if ($data['paid_amount'] >= $data['net_amount']) {
+            if ($isOnlinePayment && $data['paid_amount'] > 0) {
+                // For online payments, set status to pending until payment is confirmed
+                $data['payment_status'] = 'pending';
+                $data['status'] = 'pending';
+            } elseif ($data['paid_amount'] >= $data['net_amount']) {
                 $data['payment_status'] = 'paid';
             } elseif ($data['paid_amount'] > 0) {
                 $data['payment_status'] = 'partial';
@@ -184,18 +195,61 @@ class SaleController extends Controller
                 ]);
             }
 
-            // Record payment if any
-            if ($data['paid_amount'] > 0) {
-                $sale->payments()->create([
+            if ($isOnlinePayment && $data['paid_amount'] > 0) {
+                // For online payments, create a Payment record (gateway payment)
+                $payment = \App\Models\Payment::create([
+                    'user_id' => Auth::id(),
+                    'transaction_id' => Str::uuid()->toString(),
+                    'payment_gateway' => $paymentMethod->gateway,
+                    'amount' => $data['paid_amount'],
+                    'status' => 'pending',
+                    'product_name' => 'Sale Invoice: ' . $sale->invoice_no,
+                ]);
+                
+                // Also create a SalePayment record to link with sale
+                $salePayment = $sale->payments()->create([
                     'date' => $data['date'],
                     'amount' => $data['paid_amount'],
                     'payment_method' => $data['payment_method'],
                     'user_id' => Auth::id(),
+                    'status' => 'pending',
+                    'gateway' => $paymentMethod->gateway,
+                    'transaction_id' => $payment->transaction_id,
                 ]);
+                
+                DB::commit();
+                
+                // Redirect to payment gateway based on gateway type
+                if ($paymentMethod->gateway === 'esewa') {
+                    return redirect()->route('esewa.checkout')->with([
+                        'sale_id' => $sale->id,
+                        'payment_id' => $payment->id,
+                        'amount' => $data['paid_amount'],
+                        'product_name' => 'Sale Invoice: ' . $sale->invoice_no,
+                    ]);
+                } elseif ($paymentMethod->gateway === 'khalti') {
+                    return redirect()->route('khalti.checkout')->with([
+                        'sale_id' => $sale->id,
+                        'payment_id' => $payment->id,
+                        'amount' => $data['paid_amount'],
+                        'product_name' => 'Sale Invoice: ' . $sale->invoice_no,
+                    ]);
+                }
+            } else {
+                // Record payment for offline payments
+                if ($data['paid_amount'] > 0) {
+                    $sale->payments()->create([
+                        'date' => $data['date'],
+                        'amount' => $data['paid_amount'],
+                        'payment_method' => $data['payment_method'],
+                        'user_id' => Auth::id(),
+                        'status' => 'completed',
+                    ]);
+                }
+                
+                DB::commit();
+                return redirect()->route('sales.index')->with('success', 'Sale completed successfully.');
             }
-
-            DB::commit();
-            return redirect()->route('sales.index')->with('success', 'Sale completed successfully.');
 
         } catch (\Exception $e) {
             DB::rollBack();
