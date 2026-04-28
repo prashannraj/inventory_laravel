@@ -51,6 +51,7 @@
                                 <select name="payment_status" id="payment_status" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
                                     <option value="unpaid" {{ $sale->payment_status == 'unpaid' ? 'selected' : '' }}>Unpaid</option>
                                     <option value="partial" {{ $sale->payment_status == 'partial' ? 'selected' : '' }}>Partial</option>
+                                    <option value="pending" {{ $sale->payment_status == 'pending' ? 'selected' : '' }}>Pending</option>
                                     <option value="paid" {{ $sale->payment_status == 'paid' ? 'selected' : '' }}>Paid</option>
                                 </select>
                             </div>

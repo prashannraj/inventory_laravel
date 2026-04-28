@@ -5,99 +5,99 @@
         </h2>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <div class="py-6 xs:py-8 sm:py-12">
+        <div class="max-w-7xl mx-auto px-2 xs:px-4 sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
+                <div class="p-4 xs:p-6 sm:p-8 text-gray-900">
                     <form action="{{ route('products.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 xs:gap-8">
                             <!-- Basic Information -->
-                            <div class="space-y-4">
-                                <h3 class="text-lg font-medium border-b pb-2">Basic Information</h3>
+                            <div class="space-y-4 xs:space-y-6">
+                                <h3 class="text-lg xs:text-xl font-medium border-b pb-2 xs:pb-3">Basic Information</h3>
                                 
                                 <div>
-                                    <x-input-label for="name" :value="__('Product Name')" />
-                                    <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name')" required autofocus />
-                                    <x-input-error class="mt-2" :messages="$errors->get('name')" />
+                                    <x-input-label for="name" :value="__('Product Name')" class="text-sm xs:text-base" />
+                                    <x-text-input id="name" name="name" type="text" class="mt-1 xs:mt-2 block w-full text-sm xs:text-base" :value="old('name')" required autofocus />
+                                    <x-input-error class="mt-1 xs:mt-2" :messages="$errors->get('name')" />
                                 </div>
 
-                                <div class="grid grid-cols-2 gap-4">
+                                <div class="grid grid-cols-1 xs:grid-cols-2 gap-3 xs:gap-4">
                                     <div>
-                                        <x-input-label for="sku" :value="__('SKU (Auto-generated if empty)')" />
-                                        <x-text-input id="sku" name="sku" type="text" class="mt-1 block w-full" :value="old('sku')" />
-                                        <x-input-error class="mt-2" :messages="$errors->get('sku')" />
+                                        <x-input-label for="sku" :value="__('SKU (Auto-generated if empty)')" class="text-sm xs:text-base" />
+                                        <x-text-input id="sku" name="sku" type="text" class="mt-1 xs:mt-2 block w-full text-sm xs:text-base" :value="old('sku')" />
+                                        <x-input-error class="mt-1 xs:mt-2" :messages="$errors->get('sku')" />
                                     </div>
                                     <div>
-                                        <x-input-label for="barcode" :value="__('Barcode (Auto-generated if empty)')" />
-                                        <x-text-input id="barcode" name="barcode" type="text" class="mt-1 block w-full" :value="old('barcode')" />
-                                        <x-input-error class="mt-2" :messages="$errors->get('barcode')" />
+                                        <x-input-label for="barcode" :value="__('Barcode (Auto-generated if empty)')" class="text-sm xs:text-base" />
+                                        <x-text-input id="barcode" name="barcode" type="text" class="mt-1 xs:mt-2 block w-full text-sm xs:text-base" :value="old('barcode')" />
+                                        <x-input-error class="mt-1 xs:mt-2" :messages="$errors->get('barcode')" />
                                     </div>
                                 </div>
 
-                                <div class="grid grid-cols-2 gap-4">
+                                <div class="grid grid-cols-1 xs:grid-cols-2 gap-3 xs:gap-4">
                                     <div>
-                                        <x-input-label for="category_id" :value="__('Category')" />
-                                        <select id="category_id" name="category_id" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                        <x-input-label for="category_id" :value="__('Category')" class="text-sm xs:text-base" />
+                                        <select id="category_id" name="category_id" class="mt-1 xs:mt-2 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm xs:text-base">
                                             <option value="">Select Category</option>
                                             @foreach($categories as $category)
                                                 <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
                                             @endforeach
                                         </select>
-                                        <x-input-error class="mt-2" :messages="$errors->get('category_id')" />
+                                        <x-input-error class="mt-1 xs:mt-2" :messages="$errors->get('category_id')" />
                                     </div>
                                     <div>
-                                        <x-input-label for="brand_id" :value="__('Brand')" />
-                                        <select id="brand_id" name="brand_id" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                        <x-input-label for="brand_id" :value="__('Brand')" class="text-sm xs:text-base" />
+                                        <select id="brand_id" name="brand_id" class="mt-1 xs:mt-2 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm xs:text-base">
                                             <option value="">Select Brand</option>
                                             @foreach($brands as $brand)
                                                 <option value="{{ $brand->id }}" {{ old('brand_id') == $brand->id ? 'selected' : '' }}>{{ $brand->name }}</option>
                                             @endforeach
                                         </select>
-                                        <x-input-error class="mt-2" :messages="$errors->get('brand_id')" />
+                                        <x-input-error class="mt-1 xs:mt-2" :messages="$errors->get('brand_id')" />
                                     </div>
                                 </div>
 
-                                <div class="grid grid-cols-2 gap-4">
+                                <div class="grid grid-cols-1 xs:grid-cols-2 gap-3 xs:gap-4">
                                     <div>
-                                        <x-input-label for="unit_id" :value="__('Unit')" />
-                                        <select id="unit_id" name="unit_id" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                        <x-input-label for="unit_id" :value="__('Unit')" class="text-sm xs:text-base" />
+                                        <select id="unit_id" name="unit_id" class="mt-1 xs:mt-2 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm xs:text-base">
                                             <option value="">Select Unit</option>
                                             @foreach($units as $unit)
                                                 <option value="{{ $unit->id }}" {{ old('unit_id') == $unit->id ? 'selected' : '' }}>{{ $unit->name }} ({{ $unit->short_name }})</option>
                                             @endforeach
                                         </select>
-                                        <x-input-error class="mt-2" :messages="$errors->get('unit_id')" />
+                                        <x-input-error class="mt-1 xs:mt-2" :messages="$errors->get('unit_id')" />
                                     </div>
                                     <div>
-                                        <x-input-label for="tax_rate_id" :value="__('Tax Rate')" />
-                                        <select id="tax_rate_id" name="tax_rate_id" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                        <x-input-label for="tax_rate_id" :value="__('Tax Rate')" class="text-sm xs:text-base" />
+                                        <select id="tax_rate_id" name="tax_rate_id" class="mt-1 xs:mt-2 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm xs:text-base">
                                             <option value="">No Tax</option>
                                             @foreach($taxRates as $taxRate)
                                                 <option value="{{ $taxRate->id }}" {{ old('tax_rate_id') == $taxRate->id ? 'selected' : '' }}>{{ $taxRate->name }} ({{ $taxRate->rate }}%)</option>
                                             @endforeach
                                         </select>
-                                        <x-input-error class="mt-2" :messages="$errors->get('tax_rate_id')" />
+                                        <x-input-error class="mt-1 xs:mt-2" :messages="$errors->get('tax_rate_id')" />
                                     </div>
                                 </div>
 
                                 <div>
-                                    <x-input-label for="description" :value="__('Description')" />
-                                    <textarea id="description" name="description" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" rows="3">{{ old('description') }}</textarea>
-                                    <x-input-error class="mt-2" :messages="$errors->get('description')" />
+                                    <x-input-label for="description" :value="__('Description')" class="text-sm xs:text-base" />
+                                    <textarea id="description" name="description" class="mt-1 xs:mt-2 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm xs:text-base" rows="3">{{ old('description') }}</textarea>
+                                    <x-input-error class="mt-1 xs:mt-2" :messages="$errors->get('description')" />
                                 </div>
                             </div>
 
                             <!-- Pricing & Inventory -->
-                            <div class="space-y-4">
-                                <h3 class="text-lg font-medium border-b pb-2">Pricing & Inventory</h3>
+                            <div class="space-y-4 xs:space-y-6">
+                                <h3 class="text-lg xs:text-xl font-medium border-b pb-2 xs:pb-3">Pricing & Inventory</h3>
                                 
-                                <div class="grid grid-cols-2 gap-4">
+                                <div class="grid grid-cols-1 xs:grid-cols-2 gap-3 xs:gap-4">
                                     <div>
-                                        <x-input-label for="buying_price" :value="__('Buying Price')" />
-                                        <x-text-input id="buying_price" name="buying_price" type="number" step="0.01" class="mt-1 block w-full" :value="old('buying_price', 0)" required />
-                                        <x-input-error class="mt-2" :messages="$errors->get('buying_price')" />
+                                        <x-input-label for="buying_price" :value="__('Buying Price')" class="text-sm xs:text-base" />
+                                        <x-text-input id="buying_price" name="buying_price" type="number" step="0.01" class="mt-1 xs:mt-2 block w-full text-sm xs:text-base" :value="old('buying_price', 0)" required />
+                                        <x-input-error class="mt-1 xs:mt-2" :messages="$errors->get('buying_price')" />
                                     </div>
                                     <div>
                                         <x-input-label for="price" :value="__('Selling Price')" />

@@ -21,45 +21,65 @@
                         </div>
                     </div>
 
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead>
-                                <tr>
-                                    <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                    <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invoice No</th>
-                                    <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                                    <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Status</th>
-                                    <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Net Total</th>
-                                    <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @foreach($sales as $sale)
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap">{{ $sale->date->format('Y-m-d H:i') }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap font-medium">{{ $sale->invoice_no }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">{{ $sale->customer?->name ?? 'Guest Customer' }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        @php
-                                            $statusColors = [
-                                                'paid' => 'bg-green-100 text-green-800',
-                                                'partial' => 'bg-yellow-100 text-yellow-800',
-                                                'unpaid' => 'bg-red-100 text-red-800',
-                                            ];
-                                        @endphp
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $statusColors[$sale->payment_status] }}">
-                                            {{ ucfirst($sale->payment_status) }}
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap font-bold text-gray-900">Rs. {{ number_format($sale->net_amount, 2) }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <a href="{{ route('sales.show', $sale) }}" class="text-blue-600 hover:text-blue-900 mr-2" title="View Details"><i class="fas fa-eye"></i></a>
-                                        <a href="{{ route('sales.invoice', $sale) }}" target="_blank" class="text-green-600 hover:text-green-900 mr-2" title="Download Invoice"><i class="fas fa-file-pdf"></i></a>
-                                    </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                    <div class="overflow-x-auto -mx-2 xs:mx-0">
+                        <div class="inline-block min-w-full align-middle">
+                            <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+                                <table class="min-w-full divide-y divide-gray-300">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th scope="col" class="py-3 pl-4 pr-3 text-left text-xs font-semibold text-gray-900 sm:pl-6">Date</th>
+                                            <th scope="col" class="hidden sm:table-cell px-3 py-3 text-left text-xs font-semibold text-gray-900">Invoice No</th>
+                                            <th scope="col" class="hidden md:table-cell px-3 py-3 text-left text-xs font-semibold text-gray-900">Customer</th>
+                                            <th scope="col" class="px-3 py-3 text-left text-xs font-semibold text-gray-900">Status</th>
+                                            <th scope="col" class="px-3 py-3 text-left text-xs font-semibold text-gray-900">Total</th>
+                                            <th scope="col" class="px-3 py-3 text-left text-xs font-semibold text-gray-900">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200 bg-white">
+                                        @foreach($sales as $sale)
+                                        <tr>
+                                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
+                                                <div class="font-medium text-gray-900">{{ $sale->date->format('Y-m-d') }}</div>
+                                                <div class="text-gray-500 text-xs">{{ $sale->date->format('H:i') }}</div>
+                                            </td>
+                                            <td class="hidden sm:table-cell whitespace-nowrap px-3 py-4 text-sm text-gray-900 font-medium">
+                                                {{ $sale->invoice_no }}
+                                            </td>
+                                            <td class="hidden md:table-cell whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                                {{ $sale->customer?->name ?? 'Guest Customer' }}
+                                            </td>
+                                            <td class="whitespace-nowrap px-3 py-4 text-sm">
+                                                @php
+                                                    $statusColors = [
+                                                        'paid' => 'bg-green-100 text-green-800',
+                                                        'partial' => 'bg-yellow-100 text-yellow-800',
+                                                        'pending' => 'bg-blue-100 text-blue-800',
+                                                        'unpaid' => 'bg-red-100 text-red-800',
+                                                    ];
+                                                @endphp
+                                                <span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium {{ $statusColors[$sale->payment_status] }}">
+                                                    {{ ucfirst($sale->payment_status) }}
+                                                </span>
+                                            </td>
+                                            <td class="whitespace-nowrap px-3 py-4 text-sm font-bold text-gray-900">
+                                                Rs. {{ number_format($sale->net_amount, 2) }}
+                                            </td>
+                                            <td class="whitespace-nowrap px-3 py-4 text-sm font-medium">
+                                                <div class="flex items-center space-x-3">
+                                                    <a href="{{ route('sales.show', $sale) }}" class="text-blue-600 hover:text-blue-900" title="View Details">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <a href="{{ route('sales.invoice', $sale) }}" target="_blank" class="text-green-600 hover:text-green-900" title="Download Invoice">
+                                                        <i class="fas fa-file-pdf"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                     <div class="mt-4">
                         {{ $sales->links() }}

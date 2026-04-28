@@ -1,3 +1,146 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Cross-browser compatibility fixes */
+@layer base {
+    /* Improve text rendering across browsers */
+    html {
+        -webkit-text-size-adjust: 100%;
+        -moz-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+    
+    /* Better box-sizing for all elements */
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+    }
+    
+    /* Improve focus styles for accessibility */
+    :focus-visible {
+        outline: 2px solid #4f46e5;
+        outline-offset: 2px;
+    }
+    
+    /* Better scrollbar styling for WebKit browsers */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+        background: #a1a1a1;
+    }
+}
+
+@layer components {
+    /* Responsive container utilities */
+    .container-responsive {
+        @apply w-full px-2 xs:px-3 sm:px-4 md:px-6 lg:px-8;
+    }
+    
+    /* Responsive text utilities */
+    .text-responsive-sm {
+        @apply text-xs xs:text-sm sm:text-base;
+    }
+    
+    .text-responsive-md {
+        @apply text-sm xs:text-base sm:text-lg;
+    }
+    
+    .text-responsive-lg {
+        @apply text-base xs:text-lg sm:text-xl;
+    }
+    
+    /* Responsive padding utilities */
+    .p-responsive {
+        @apply p-2 xs:p-3 sm:p-4 md:p-6;
+    }
+    
+    .px-responsive {
+        @apply px-2 xs:px-3 sm:px-4 md:px-6;
+    }
+    
+    .py-responsive {
+        @apply py-2 xs:py-3 sm:py-4 md:py-6;
+    }
+    
+    /* Responsive grid utilities */
+    .grid-responsive {
+        @apply grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6;
+    }
+    
+    /* Mobile-first table styles */
+    .table-responsive {
+        @apply w-full border-collapse;
+    }
+    
+    .table-responsive th {
+        @apply text-left py-2 px-3 bg-gray-50 font-semibold text-gray-700 border-b border-gray-200;
+    }
+    
+    .table-responsive td {
+        @apply py-2 px-3 border-b border-gray-100;
+    }
+    
+    /* Better button styles for touch devices */
+    .btn-touch {
+        @apply px-4 py-2 rounded-lg font-medium transition-all active:scale-95 min-h-[44px] min-w-[44px];
+    }
+    
+    /* Responsive card */
+    .card-responsive {
+        @apply bg-white rounded-lg shadow-sm border border-gray-200 p-3 xs:p-4 sm:p-6;
+    }
+}
+
+@layer utilities {
+    /* Hide scrollbar but keep functionality */
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+    
+    /* Better touch target sizes */
+    .touch-target {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    /* Responsive spacing */
+    .space-y-responsive > * + * {
+        @apply mt-2 xs:mt-3 sm:mt-4;
+    }
+    
+    .space-x-responsive > * + * {
+        @apply ml-2 xs:ml-3 sm:ml-4;
+    }
+    
+    /* Flex responsive utilities */
+    .flex-responsive {
+        @apply flex flex-col xs:flex-row;
+    }
+    
+    /* Grid gap responsive */
+    .gap-responsive {
+        @apply gap-2 xs:gap-3 sm:gap-4;
+    }
+}

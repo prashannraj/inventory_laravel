@@ -43,6 +43,7 @@
                                     $statusColors = [
                                         'paid' => 'bg-emerald-100 text-emerald-700 border-emerald-200',
                                         'partial' => 'bg-amber-100 text-amber-700 border-amber-200',
+                                        'pending' => 'bg-yellow-100 text-yellow-700 border-yellow-200',
                                         'unpaid' => 'bg-rose-100 text-rose-700 border-rose-200',
                                     ];
                                 @endphp

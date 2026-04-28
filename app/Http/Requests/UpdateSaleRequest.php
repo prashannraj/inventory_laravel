@@ -29,7 +29,7 @@ class UpdateSaleRequest extends FormRequest
             'shipping' => 'nullable|numeric|min:0',
             'notes' => 'nullable|string|max:500',
             'status' => 'required|in:pending,completed,cancelled,returned',
-            'payment_status' => 'required|in:unpaid,partial,paid',
+            'payment_status' => 'required|in:unpaid,partial,paid,pending',
             'paid_amount' => 'required|numeric|min:0',
             'payment_method' => 'required|string|max:50',
             'items' => 'required|array|min:1',

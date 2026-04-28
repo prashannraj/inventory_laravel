@@ -87,20 +87,21 @@ new class extends Component
     <div x-show="sidebarOpen" @click="sidebarOpen = false" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-40 sm:hidden transition-opacity"></div>
 
     <!-- Sidebar Container -->
-    <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full sm:translate-x-0'" class="fixed top-0 left-0 bottom-0 w-64 bg-white border-r border-gray-100 z-50 transition-transform duration-300 ease-in-out shadow-xl sm:shadow-none">
+    <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full sm:translate-x-0'" class="fixed top-0 left-0 bottom-0 w-64 xs:w-72 sm:w-64 bg-white border-r border-gray-100 z-50 transition-transform duration-300 ease-in-out shadow-xl sm:shadow-none">
         
         <!-- Logo Area -->
-        <div class="h-16 flex items-center px-6 border-b border-gray-50">
+        <div class="h-16 flex items-center px-4 sm:px-6 border-b border-gray-50">
             <a href="{{ route('dashboard') }}" wire:navigate class="flex items-center gap-3 group">
                 <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white group-hover:scale-110 transition-transform">
                     <i class="fas fa-cube"></i>
                 </div>
-                <span class="font-black text-lg text-gray-900 tracking-tighter uppercase truncate">{{ $siteSettings['company_name'] ?? 'Inventory' }}</span>
+                <span class="font-black text-lg text-gray-900 tracking-tighter uppercase truncate hidden xs:block">{{ $siteSettings['company_name'] ?? 'Inventory' }}</span>
+                <span class="font-black text-lg text-gray-900 tracking-tighter uppercase truncate xs:hidden">IMS</span>
             </a>
         </div>
 
         <!-- Navigation Menu -->
-        <nav class="flex-1 px-4 py-6 overflow-y-auto space-y-8 h-[calc(100vh-4rem)]">
+        <nav class="flex-1 px-3 sm:px-4 py-6 overflow-y-auto space-y-8 h-[calc(100vh-4rem)]">
             
             <!-- Dashboard Section -->
             <div>

@@ -36,72 +36,84 @@
                         </div>
                     </div>
 
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead>
-                                <tr>
-                                    <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
-                                    <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKU/Barcode</th>
-                                    <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price (Buy/Sell)</th>
-                                    <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
-                                    <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @foreach($products as $product)
-                                <tr>
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center">
-                                            <div class="flex-shrink-0 h-10 w-10">
-                                                @if($product->images->where('is_primary', true)->first())
-                                                    <img class="h-10 w-10 rounded-full object-cover" src="{{ asset('storage/' . $product->images->where('is_primary', true)->first()->image_path) }}" alt="">
-                                                @else
-                                                    <div class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                                                        <i class="fas fa-box text-gray-400"></i>
+                    <div class="overflow-x-auto -mx-2 xs:mx-0">
+                        <div class="inline-block min-w-full align-middle">
+                            <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+                                <table class="min-w-full divide-y divide-gray-300">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th scope="col" class="py-3 pl-4 pr-3 text-left text-xs font-semibold text-gray-900 sm:pl-6">Product</th>
+                                            <th scope="col" class="hidden xs:table-cell px-3 py-3 text-left text-xs font-semibold text-gray-900">SKU/Barcode</th>
+                                            <th scope="col" class="hidden sm:table-cell px-3 py-3 text-left text-xs font-semibold text-gray-900">Price</th>
+                                            <th scope="col" class="px-3 py-3 text-left text-xs font-semibold text-gray-900">Stock</th>
+                                            <th scope="col" class="hidden md:table-cell px-3 py-3 text-left text-xs font-semibold text-gray-900">Status</th>
+                                            <th scope="col" class="px-3 py-3 text-left text-xs font-semibold text-gray-900">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200 bg-white">
+                                        @foreach($products as $product)
+                                        <tr>
+                                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
+                                                <div class="flex items-center">
+                                                    <div class="h-10 w-10 flex-shrink-0">
+                                                        @if($product->images->where('is_primary', true)->first())
+                                                            <img class="h-10 w-10 rounded-full object-cover" src="{{ asset('storage/' . $product->images->where('is_primary', true)->first()->image_path) }}" alt="">
+                                                        @else
+                                                            <div class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                                                                <i class="fas fa-box text-gray-400"></i>
+                                                            </div>
+                                                        @endif
                                                     </div>
+                                                    <div class="ml-4">
+                                                        <div class="font-medium text-gray-900">{{ $product->name }}</div>
+                                                        <div class="text-gray-500 text-xs">{{ $product->category?->name ?? 'No Category' }}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="hidden xs:table-cell whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                                <div class="font-medium">SKU: {{ $product->sku }}</div>
+                                                <div class="text-xs">BC: {{ $product->barcode }}</div>
+                                            </td>
+                                            <td class="hidden sm:table-cell whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                                <div class="font-medium">Rs. {{ number_format($product->price, 2) }}</div>
+                                                <div class="text-xs text-green-600">Buy: Rs. {{ number_format($product->buying_price, 2) }}</div>
+                                            </td>
+                                            <td class="whitespace-nowrap px-3 py-4 text-sm">
+                                                <div class="{{ $product->qty <= $product->alert_quantity ? 'text-red-600 font-bold' : 'text-gray-900' }}">
+                                                    {{ $product->qty }} {{ $product->unit?->short_name }}
+                                                </div>
+                                                @if($product->qty <= $product->alert_quantity)
+                                                    <span class="text-xs text-red-500">Low Stock!</span>
                                                 @endif
-                                            </div>
-                                            <div class="ml-4">
-                                                <div class="text-sm font-medium text-gray-900">{{ $product->name }}</div>
-                                                <div class="text-sm text-gray-500">{{ $product->category?->name }} | {{ $product->brand?->name }}</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <div class="text-sm text-gray-900">SKU: {{ $product->sku }}</div>
-                                        <div class="text-sm text-gray-500">BC: {{ $product->barcode }}</div>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <div class="text-sm text-gray-900">Rs. {{ number_format($product->buying_price, 2) }} / Rs. {{ number_format($product->price, 2) }}</div>
-                                        <div class="text-xs text-green-600">Margin: {{ number_format($product->margin, 1) }}%</div>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <div class="text-sm {{ $product->qty <= $product->alert_quantity ? 'text-red-600 font-bold' : 'text-gray-900' }}">
-                                            {{ $product->qty }} {{ $product->unit?->short_name }}
-                                        </div>
-                                        @if($product->qty <= $product->alert_quantity)
-                                            <span class="text-xs text-red-500">Low Stock!</span>
-                                        @endif
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $product->active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                            {{ $product->active ? 'Active' : 'Inactive' }}
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <a href="{{ route('products.show', $product) }}" class="text-blue-600 hover:text-blue-900 mr-2"><i class="fas fa-eye"></i></a>
-                                        <a href="{{ route('products.edit', $product) }}" class="text-indigo-600 hover:text-indigo-900 mr-2"><i class="fas fa-edit"></i></a>
-                                        <form action="{{ route('products.destroy', $product) }}" method="POST" class="inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="text-red-600 hover:text-red-900" onclick="return confirm('Are you sure?')"><i class="fas fa-trash"></i></button>
-                                        </form>
-                                    </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                                            </td>
+                                            <td class="hidden md:table-cell whitespace-nowrap px-3 py-4 text-sm">
+                                                <span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium {{ $product->active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                                    {{ $product->active ? 'Active' : 'Inactive' }}
+                                                </span>
+                                            </td>
+                                            <td class="whitespace-nowrap px-3 py-4 text-sm font-medium">
+                                                <div class="flex items-center space-x-2">
+                                                    <a href="{{ route('products.show', $product) }}" class="text-blue-600 hover:text-blue-900" title="View">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <a href="{{ route('products.edit', $product) }}" class="text-indigo-600 hover:text-indigo-900" title="Edit">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <form action="{{ route('products.destroy', $product) }}" method="POST" class="inline">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="text-red-600 hover:text-red-900" onclick="return confirm('Are you sure?')" title="Delete">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                     <div class="mt-4">
                         {{ $products->links() }}
